@@ -1,0 +1,14 @@
+# Python
+.venv/
+__pycache__/
+
+# Variables de entorno reales (en el repo va solo .env.example)
+.env
+
+# Frontend
+node_modules/
+dist/
+
+# Sistema y entrega
+.DS_Store
+entrega/
