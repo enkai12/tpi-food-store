@@ -1,0 +1,131 @@
+# Registro, login, sesión y logout.
+# Correr en orden con la API levantada. REST Client guarda la cookie access_token del
+# login y la manda sola en los pedidos siguientes, como hace el navegador.
+# La cuenta desactivada (400) se prueba en usuarios.http, cuando ya se puede desactivar.
+@baseUrl = http://localhost:8000
+@auth = {{baseUrl}}/api/v1/auth
+
+### ==========================================
+### REGISTRO (público)
+### ==========================================
+
+### 1. Registrar a maría: queda con rol user y la respuesta no trae la contraseña (201)
+POST {{auth}}/register
+Content-Type: application/json
+
+{
+  "username": "maria",
+  "full_name": "María García",
+  "email": "maria@example.com",
+  "password": "Maria1234!"
+}
+
+### 2. Intentar registrarse como admin: el campo role se ignora y queda user (201)
+POST {{auth}}/register
+Content-Type: application/json
+
+{
+  "username": "pedro",
+  "full_name": "Pedro Gómez",
+  "email": "pedro@example.com",
+  "password": "Pedro1234!",
+  "role": "admin"
+}
+
+### 3. Nombre de usuario repetido (409)
+POST {{auth}}/register
+Content-Type: application/json
+
+{
+  "username": "maria",
+  "full_name": "Otra María",
+  "email": "otra@example.com",
+  "password": "Maria1234!"
+}
+
+### 4. Email repetido (409)
+POST {{auth}}/register
+Content-Type: application/json
+
+{
+  "username": "maria2",
+  "full_name": "María Dos",
+  "email": "maria@example.com",
+  "password": "Maria1234!"
+}
+
+### 5. Email inválido (422)
+POST {{auth}}/register
+Content-Type: application/json
+
+{
+  "username": "lucas",
+  "full_name": "Lucas",
+  "email": "no-es-un-email",
+  "password": "Lucas1234!"
+}
+
+### 6. Contraseña de menos de 8 caracteres (422)
+POST {{auth}}/register
+Content-Type: application/json
+
+{
+  "username": "lucas",
+  "full_name": "Lucas",
+  "email": "lucas@example.com",
+  "password": "1234567"
+}
+
+### 7. Nombre de usuario vacío (422)
+POST {{auth}}/register
+Content-Type: application/json
+
+{
+  "username": "",
+  "full_name": "Lucas",
+  "email": "lucas@example.com",
+  "password": "Lucas1234!"
+}
+
+### ==========================================
+### LOGIN Y SESIÓN
+### ==========================================
+
+### 8. /me sin haber iniciado sesión (401)
+GET {{auth}}/me
+
+### 9. Login con contraseña incorrecta (401)
+POST {{auth}}/token
+Content-Type: application/x-www-form-urlencoded
+
+username=maria&password=incorrecta
+
+### 10. Login de un usuario que no existe: mismo mensaje que el anterior (401)
+POST {{auth}}/token
+Content-Type: application/x-www-form-urlencoded
+
+username=nadie&password=Maria1234!
+
+### 11. Login mandando JSON en lugar de formulario (422)
+POST {{auth}}/token
+Content-Type: application/json
+
+{
+  "username": "maria",
+  "password": "Maria1234!"
+}
+
+### 12. Login de maría: el token llega en la cookie, no en el cuerpo (200)
+POST {{auth}}/token
+Content-Type: application/x-www-form-urlencoded
+
+username=maria&password=Maria1234!
+
+### 13. /me con la cookie del login (200)
+GET {{auth}}/me
+
+### 14. Logout: la respuesta borra la cookie (200)
+POST {{auth}}/logout
+
+### 15. /me después del logout (401)
+GET {{auth}}/me

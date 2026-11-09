@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
 from app.core.database import create_all_tables
+from app.modules.auth.router import router as auth_router
 
 
 @asynccontextmanager
@@ -25,3 +26,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Todos los endpoints quedan bajo /api/v1
+app.include_router(auth_router, prefix="/api/v1")
