@@ -7,7 +7,15 @@ engine = create_engine(settings.DATABASE_URL)
 
 
 def create_all_tables() -> None:
-    # Crea las tablas de los modelos que estén importados y que todavía no existan
+    # Importar los modelos los registra en SQLModel.metadata; sin estos imports,
+    # create_all no sabe qué tablas crear. Van acá adentro para que core no dependa
+    # de los módulos al cargarse
+    import app.modules.categorias.models  # noqa: F401
+    import app.modules.pedidos.models  # noqa: F401
+    import app.modules.productos.models  # noqa: F401
+    import app.modules.usuarios.models  # noqa: F401
+
+    # Crea las tablas que todavía no existan; las que ya existen no las toca
     SQLModel.metadata.create_all(engine)
 
 
