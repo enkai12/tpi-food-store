@@ -16,7 +16,9 @@ class BaseRepository(Generic[T]):
         return self.session.get(self.model, id)
 
     def get_all(self) -> list[T]:
-        return list(self.session.exec(select(self.model)).all())
+        # Sin ORDER BY, PostgreSQL no garantiza el orden: después de un UPDATE la fila
+        # puede aparecer en otro lugar. Ordeno por id para que el listado sea estable
+        return list(self.session.exec(select(self.model).order_by(self.model.id)).all())
 
     def add(self, entity: T) -> T:
         self.session.add(entity)
