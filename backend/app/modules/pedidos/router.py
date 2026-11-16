@@ -11,6 +11,7 @@ from app.modules.pedidos.schemas import (
     PedidoCreate,
     PedidoRead,
     PedidosPaginados,
+    ResumenPedidos,
 )
 from app.modules.pedidos.service import (
     PedidoAjeno,
@@ -61,8 +62,17 @@ def listar_pedidos(
     return service.listar(usuario.id, usuario.role == "admin", skip, limit, estado)
 
 
-# Detalle con sus líneas: el dueño o el admin. /pedidos/resumen (paso 14) va antes que esta
-# ruta, porque si no FastAPI intentaría leer «resumen» como un id
+# Los indicadores del panel del admin. Tiene que estar antes de GET /{id}: FastAPI prueba
+# las rutas en el orden en que se declaran, y /{id} intentaría leer «resumen» como un id (422)
+@router.get("/resumen", response_model=ResumenPedidos)
+def resumen_pedidos(
+    _admin: Admin,
+    service: Annotated[PedidoService, Depends(get_pedido_service)],
+):
+    return service.resumen()
+
+
+# Detalle con sus líneas: el dueño o el admin
 @router.get("/{id}", response_model=PedidoRead)
 def obtener_pedido(
     id: Annotated[int, Path(gt=0)],

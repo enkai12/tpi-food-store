@@ -1,5 +1,5 @@
 # Pedidos: crear el pedido con RN-01 y RN-06 (parte 1), listarlos y verlos con RN-04 (parte 2)
-# y cambiar su estado o cancelarlos con RN-02 a RN-04 (parte 3).
+# y cambiar su estado o cancelarlos con RN-02 a RN-04 (parte 3), y el resumen del panel (parte 4).
 # Con una base nueva, correr antes el seed, auth.http, usuarios.http, categorias.http y
 # productos.http. Productos que quedan: 1 Muzzarella (stock 12, $9000), 2 Empanada de carne
 # (40, $1200), 3 Fugazzeta (de baja), 4 Agua mineral (24, $1600, de una categoría de baja),
@@ -441,4 +441,33 @@ PATCH {{pedidos}}/1/cancelar
 GET {{pedidos}}?estado=CANCELADO
 
 ### 66. Logout (200)
+POST {{auth}}/logout
+
+### ==========================================
+### RESUMEN DEL PANEL
+### Quedaron: 1 ENTREGADO ($21600), 2, 3 y 4 CANCELADO y 5 PENDIENTE, todos de hoy
+### ==========================================
+
+### 67. Resumen sin sesión (401)
+GET {{pedidos}}/resumen
+
+### 68. Login de maría (200)
+POST {{auth}}/token
+Content-Type: application/x-www-form-urlencoded
+
+username=maria&password=Maria1234!
+
+### 69. maría pide el resumen: es solo del admin (403)
+GET {{pedidos}}/resumen
+
+### 70. Login del admin (200)
+POST {{auth}}/token
+Content-Type: application/x-www-form-urlencoded
+
+username=admin&password=Admin1234!
+
+### 71. El resumen: 1 pendiente, 0 en preparación, 1 entregado, 3 cancelados, 5 de hoy y $21600 (200)
+GET {{pedidos}}/resumen
+
+### 72. Logout (200)
 POST {{auth}}/logout

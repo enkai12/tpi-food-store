@@ -63,3 +63,13 @@ class PedidosPaginados(SQLModel):
 # Cuerpo del PATCH /estado: uno de los cuatro estados (la transición la valida el Service)
 class CambioEstado(SQLModel):
     estado: EstadoPedido
+
+
+# Los indicadores del panel del admin (GET /pedidos/resumen)
+class ResumenPedidos(SQLModel):
+    pendientes: int
+    en_preparacion: int
+    entregados: int
+    cancelados: int
+    pedidos_hoy: int
+    ingresos_entregados: float

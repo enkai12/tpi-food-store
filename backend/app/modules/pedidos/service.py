@@ -1,6 +1,11 @@
-from app.core.fechas import ahora_utc
+from app.core.fechas import ahora_utc, inicio_de_hoy
 from app.modules.pedidos.models import DetallePedido, Pedido
-from app.modules.pedidos.schemas import PedidoCreate, PedidoRead, PedidosPaginados
+from app.modules.pedidos.schemas import (
+    PedidoCreate,
+    PedidoRead,
+    PedidosPaginados,
+    ResumenPedidos,
+)
 from app.modules.pedidos.unit_of_work import PedidoUnitOfWork
 from app.modules.productos.service import ProductoNoEncontrado
 
@@ -73,6 +78,13 @@ class PedidoService:
             )
             items = [PedidoRead.model_validate(p) for p in pedidos]
             return PedidosPaginados(total=total, items=items)
+
+    def resumen(self) -> ResumenPedidos:
+        with self.uow as uow:
+            fila = uow.pedidos.count_by_estado(inicio_de_hoy())
+            datos = dict(fila._mapping)
+            datos["ingresos_entregados"] = round(datos["ingresos_entregados"], 2)
+            return ResumenPedidos(**datos)
 
     def obtener(self, id: int, usuario_id: int, es_admin: bool) -> PedidoRead:
         with self.uow as uow:

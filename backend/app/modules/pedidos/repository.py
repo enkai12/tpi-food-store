@@ -1,3 +1,6 @@
+from datetime import datetime
+
+from sqlalchemy import Row
 from sqlalchemy.orm import selectinload
 from sqlmodel import Session, func, select
 
@@ -44,3 +47,22 @@ class PedidoRepository(BaseRepository[Pedido]):
             .limit(limit)
         )
         return total, list(self.session.exec(pagina).all())
+
+    def count_by_estado(self, desde: datetime) -> Row:
+        # Los indicadores del panel en una sola consulta, que recorre la tabla una vez.
+        # count(*) FILTER (WHERE ...) cuenta solo las filas que cumplen la condición
+        def contar(condicion):
+            return func.count().filter(condicion)
+
+        consulta = select(
+            contar(Pedido.estado == "PENDIENTE").label("pendientes"),
+            contar(Pedido.estado == "EN_PREPARACION").label("en_preparacion"),
+            contar(Pedido.estado == "ENTREGADO").label("entregados"),
+            contar(Pedido.estado == "CANCELADO").label("cancelados"),
+            contar(Pedido.created_at >= desde).label("pedidos_hoy"),
+            # Sin pedidos entregados, SUM devuelve NULL: coalesce lo pasa a 0
+            func.coalesce(
+                func.sum(Pedido.total).filter(Pedido.estado == "ENTREGADO"), 0
+            ).label("ingresos_entregados"),
+        )
+        return self.session.exec(consulta).one()
