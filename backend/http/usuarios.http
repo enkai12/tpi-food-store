@@ -1,7 +1,7 @@
-# Gestión de usuarios del admin: listar, activar y desactivar.
-# Con una base nueva, correr antes `python -m app.db.seed` (admin, id 1) y auth.http
-# (maria, id 2, y pedro, id 3). Después, este archivo en orden: cada login reemplaza
-# la cookie, así que los pedidos usan la sesión del último login exitoso.
+# Gestión de usuarios del admin: listar, activar y desactivar. Con una base nueva, correr
+# antes `python -m app.db.seed --solo-admin` (admin, id 1) y auth.http (maria, id 2, y
+# pedro, id 3). Después, este archivo en orden: cada login reemplaza la cookie, así que
+# los pedidos usan la sesión del último login exitoso.
 @baseUrl = http://localhost:8000
 @auth = {{baseUrl}}/api/v1/auth
 @admin = {{baseUrl}}/api/v1/admin/usuarios

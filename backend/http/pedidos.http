@@ -1,9 +1,10 @@
-# Pedidos: crear el pedido con RN-01 y RN-06 (parte 1), listarlos y verlos con RN-04 (parte 2)
-# y cambiar su estado o cancelarlos con RN-02 a RN-04 (parte 3), y el resumen del panel (parte 4).
-# Con una base nueva, correr antes el seed, auth.http, usuarios.http, categorias.http y
-# productos.http. Productos que quedan: 1 Muzzarella (stock 12, $9000), 2 Empanada de carne
-# (40, $1200), 3 Fugazzeta (de baja), 4 Agua mineral (24, $1600, de una categoría de baja),
-# 5 Napolitana (no disponible), 6 Empanada de pollo (30, $1200) y 7 Promo 50% (10, $4250).
+# Pedidos: crear el pedido con RN-01 y RN-06 (parte 1), listarlos y verlos con RN-04
+# (parte 2) y cambiar su estado o cancelarlos con RN-02 a RN-04 (parte 3), y el resumen
+# del panel (parte 4). Con una base nueva, correr antes `python -m app.db.seed
+# --solo-admin`, auth.http, usuarios.http, categorias.http y productos.http. Productos que
+# quedan: 1 Muzzarella (stock 12, $9000), 2 Empanada de carne (40, $1200), 3 Fugazzeta (de
+# baja), 4 Agua mineral (24, $1600, de una categoría de baja), 5 Napolitana (no
+# disponible), 6 Empanada de pollo (30, $1200) y 7 Promo 50% (10, $4250).
 @baseUrl = http://localhost:8000
 @auth = {{baseUrl}}/api/v1/auth
 @pedidos = {{baseUrl}}/api/v1/pedidos

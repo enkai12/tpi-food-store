@@ -1,7 +1,8 @@
-# Registro, login, sesión y logout.
-# Correr en orden con la API levantada. REST Client guarda la cookie access_token del
-# login y la manda sola en los pedidos siguientes, como hace el navegador.
-# La cuenta desactivada (400) se prueba en usuarios.http, cuando ya se puede desactivar.
+# Registro, login, sesión y logout. Con una base nueva y `python -m app.db.seed
+# --solo-admin`. Correr en orden con la API levantada. REST Client guarda la cookie
+# access_token del login y la manda sola en los pedidos siguientes, como hace el
+# navegador. La cuenta desactivada (400) se prueba en usuarios.http, cuando ya se puede
+# desactivar.
 @baseUrl = http://localhost:8000
 @auth = {{baseUrl}}/api/v1/auth
 

@@ -14,6 +14,11 @@ class ProductoRepository(BaseRepository[Producto]):
     def __init__(self, session: Session) -> None:
         super().__init__(session, Producto)
 
+    def get_by_nombre(self, nombre: str) -> Producto | None:
+        # Sin distinguir mayúsculas. Lo usa el seed para no cargar dos veces el mismo producto
+        consulta = select(Producto).where(func.lower(Producto.nombre) == nombre.lower())
+        return self.session.exec(consulta).first()
+
     def list_for_update(self, ids: list[int]) -> list[Producto]:
         # SELECT ... FOR UPDATE: bloquea estas filas hasta el commit o el rollback. Si otro
         # pedido quiere los mismos productos, espera a que este termine y lee el stock ya

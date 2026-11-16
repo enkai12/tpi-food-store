@@ -1,7 +1,8 @@
-# Productos: detalle público y ABM del admin con stock y baja lógica.
-# Con una base nueva, correr antes el seed, auth.http, usuarios.http y categorias.http:
-# quedan Pizzas (1) y Empanadas (2) activas y Postres (3) dada de baja.
-# Los productos que se crean acá quedan con los ids 1 a 7, y la categoría Bebidas con el 4.
+# Productos: detalle público y ABM del admin con stock y baja lógica. Con una base nueva,
+# correr antes `python -m app.db.seed --solo-admin`, auth.http, usuarios.http y
+# categorias.http: quedan Pizzas (1) y Empanadas (2) activas y Postres (3) dada de baja.
+# Los productos que se crean acá quedan con los ids 1 a 7, y la categoría Bebidas con el
+# 4.
 @baseUrl = http://localhost:8000
 @auth = {{baseUrl}}/api/v1/auth
 @productos = {{baseUrl}}/api/v1/productos
