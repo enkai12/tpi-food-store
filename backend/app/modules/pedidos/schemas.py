@@ -9,6 +9,9 @@ from app.core.validaciones import ENTERO_MAX, SinNulos, TextoOpcional
 # RN-06: solo estas dos formas de pago; cualquier otro valor da 422
 FormaPago = Literal["EFECTIVO", "TRANSFERENCIA"]
 
+# Los cuatro estados de la máquina de estados (p. 5)
+EstadoPedido = Literal["PENDIENTE", "EN_PREPARACION", "ENTREGADO", "CANCELADO"]
+
 # RN-06: de 5 a 200 caracteres, contados sin los espacios de los extremos
 Direccion = Annotated[
     str, StringConstraints(strip_whitespace=True, min_length=5, max_length=200), SinNulos
@@ -49,3 +52,9 @@ class PedidoRead(SQLModel):
     created_at: datetime
     updated_at: datetime
     items: list[DetallePedidoRead]  # se arma desde la relación Pedido.items
+
+
+# Una página del listado: total es la cantidad que cumple los filtros, no solo esta página
+class PedidosPaginados(SQLModel):
+    total: int
+    items: list[PedidoRead]

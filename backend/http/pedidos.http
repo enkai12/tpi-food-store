@@ -1,4 +1,4 @@
-# Pedidos (parte 1): crear el pedido con RN-01 y RN-06.
+# Pedidos: crear el pedido con RN-01 y RN-06 (parte 1) y listarlos y verlos con RN-04 (parte 2).
 # Con una base nueva, correr antes el seed, auth.http, usuarios.http, categorias.http y
 # productos.http. Productos que quedan: 1 Muzzarella (stock 12, $9000), 2 Empanada de carne
 # (40, $1200), 3 Fugazzeta (de baja), 4 Agua mineral (24, $1600, de una categoría de baja),
@@ -227,4 +227,81 @@ Content-Type: application/json
 }
 
 ### 23. Logout (200)
+POST {{auth}}/logout
+
+### ==========================================
+### LISTADO Y DETALLE (RN-04)
+### ==========================================
+
+### 24. Listar sin sesión (401)
+GET {{pedidos}}
+
+### 25. Login de pedro (200)
+POST {{auth}}/token
+Content-Type: application/x-www-form-urlencoded
+
+username=pedro&password=Pedro1234!
+
+### 26. pedro hace su primer pedido: queda con el id 5 (201)
+POST {{pedidos}}
+Content-Type: application/json
+
+{
+  "items": [{ "producto_id": 6, "cantidad": 1 }],
+  "forma_pago": "EFECTIVO",
+  "direccion_entrega": "Rivadavia 4500"
+}
+
+### 27. pedro lista: solo ve el suyo (200)
+GET {{pedidos}}
+
+### 28. pedro ve el detalle de su pedido (200)
+GET {{pedidos}}/5
+
+### 29. pedro pide el pedido 1, que es de maría (403)
+GET {{pedidos}}/1
+
+### 30. Un pedido que no existe: primero se controla que exista (404)
+GET {{pedidos}}/999
+
+### 31. Un id que no es positivo (422)
+GET {{pedidos}}/0
+
+### 32. Login de maría (200)
+POST {{auth}}/token
+Content-Type: application/x-www-form-urlencoded
+
+username=maria&password=Maria1234!
+
+### 33. maría lista: sus 3 pedidos, del más nuevo al más viejo (200)
+GET {{pedidos}}
+
+### 34. Primera página de 2: total sigue siendo 3 (200)
+GET {{pedidos}}?skip=0&limit=2
+
+### 35. Sus pedidos PENDIENTE: los 3 (200)
+GET {{pedidos}}?estado=PENDIENTE
+
+### 36. Sus pedidos CANCELADO: ninguno todavía (200)
+GET {{pedidos}}?estado=CANCELADO
+
+### 37. Un estado que no existe (422)
+GET {{pedidos}}?estado=ENVIADO
+
+### 38. maría tampoco ve el pedido de pedro (403)
+GET {{pedidos}}/5
+
+### 39. Login del admin (200)
+POST {{auth}}/token
+Content-Type: application/x-www-form-urlencoded
+
+username=admin&password=Admin1234!
+
+### 40. El admin ve todos: los 5 (200)
+GET {{pedidos}}
+
+### 41. El admin ve el detalle del pedido de maría (200)
+GET {{pedidos}}/1
+
+### 42. Logout (200)
 POST {{auth}}/logout

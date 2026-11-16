@@ -1,12 +1,22 @@
 from app.core.fechas import ahora_utc
 from app.modules.pedidos.models import DetallePedido, Pedido
-from app.modules.pedidos.schemas import PedidoCreate, PedidoRead
+from app.modules.pedidos.schemas import PedidoCreate, PedidoRead, PedidosPaginados
 from app.modules.pedidos.unit_of_work import PedidoUnitOfWork
 from app.modules.productos.service import ProductoNoEncontrado
 
 
-# Excepciones de dominio: el Router las traduce a 400. La de producto inexistente ya
-# está en el módulo de productos y la reuso (404)
+# Excepciones de dominio. El Router traduce PedidoNoEncontrado a 404, PedidoAjeno a 403 y
+# las demás a 400. La de producto inexistente ya está en el módulo de productos y la reuso
+class PedidoNoEncontrado(Exception):
+    def __init__(self, id: int) -> None:
+        super().__init__(f"Pedido {id} no encontrado")
+
+
+class PedidoAjeno(Exception):
+    def __init__(self) -> None:
+        super().__init__("No tenés permiso para ver este pedido")
+
+
 class ProductoRepetido(Exception):
     def __init__(self, producto_id: int) -> None:
         super().__init__(f"El producto {producto_id} está repetido en el pedido")
@@ -27,6 +37,32 @@ class StockInsuficiente(Exception):
 class PedidoService:
     def __init__(self, uow: PedidoUnitOfWork) -> None:
         self.uow = uow
+
+    def listar(
+        self,
+        usuario_id: int,
+        es_admin: bool,
+        skip: int,
+        limit: int,
+        estado: str | None = None,
+    ) -> PedidosPaginados:
+        # RN-04: el admin ve todos; un cliente, solo los suyos
+        with self.uow as uow:
+            total, pedidos = uow.pedidos.list_by_usuario(
+                None if es_admin else usuario_id, skip, limit, estado
+            )
+            items = [PedidoRead.model_validate(p) for p in pedidos]
+            return PedidosPaginados(total=total, items=items)
+
+    def obtener(self, id: int, usuario_id: int, es_admin: bool) -> PedidoRead:
+        with self.uow as uow:
+            pedido = uow.pedidos.get_by_id(id)
+            # Primero si existe (404) y después de quién es (403), como pide la consigna
+            if pedido is None:
+                raise PedidoNoEncontrado(id)
+            if not es_admin and pedido.usuario_id != usuario_id:
+                raise PedidoAjeno()
+            return PedidoRead.model_validate(pedido)
 
     def crear(self, data: PedidoCreate, usuario_id: int) -> PedidoRead:
         # RN-01: un producto repetido se rechaza antes de tocar la base
