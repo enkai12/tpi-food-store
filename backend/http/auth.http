@@ -129,3 +129,29 @@ POST {{auth}}/logout
 
 ### 15. /me después del logout (401)
 GET {{auth}}/me
+
+### ==========================================
+### ESPACIOS EN LOS TEXTOS
+### ==========================================
+
+### 16. Registro con un nombre completo de solo espacios (422)
+POST {{auth}}/register
+Content-Type: application/json
+
+{
+  "username": "lucas",
+  "full_name": "   ",
+  "email": "lucas@example.com",
+  "password": "Lucas1234!"
+}
+
+### 17. Registro de " maria ": se recortan los espacios y choca con maría (409)
+POST {{auth}}/register
+Content-Type: application/json
+
+{
+  "username": " maria ",
+  "full_name": "Otra María",
+  "email": "otra.maria@example.com",
+  "password": "Maria1234!"
+}
