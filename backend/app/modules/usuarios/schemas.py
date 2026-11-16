@@ -4,12 +4,20 @@ from typing import Annotated
 from pydantic import AfterValidator, EmailStr, StringConstraints, field_validator
 from sqlmodel import Field, SQLModel
 
+from app.core.validaciones import SinNulos
+
 # Saca los espacios del principio y del final antes de medir: "   " no pasa
-TextoNoVacio = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1)]
+TextoNoVacio = Annotated[
+    str, StringConstraints(strip_whitespace=True, min_length=1, max_length=100), SinNulos
+]
 
 # El usuario y el email se guardan en minúsculas: «Maria» y «maria» son la misma cuenta,
 # y el UNIQUE de la base deja de distinguir mayúsculas
-Username = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, to_lower=True)]
+Username = Annotated[
+    str,
+    StringConstraints(strip_whitespace=True, min_length=1, max_length=50, to_lower=True),
+    SinNulos,
+]
 Email = Annotated[EmailStr, AfterValidator(str.lower)]
 
 
@@ -18,7 +26,7 @@ class UserCreate(SQLModel):
     username: Username
     full_name: TextoNoVacio
     email: Email
-    password: str = Field(min_length=8)
+    password: Annotated[str, SinNulos] = Field(min_length=8)  # bcrypt no admite el nulo
 
     # bcrypt usa solo los primeros 72 bytes, y max_length cuenta caracteres: una «ñ» ocupa
     # 2 bytes. Mido los bytes para que nunca se descarte parte de la contraseña

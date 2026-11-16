@@ -205,3 +205,24 @@ Content-Type: application/json
   "email": "lucia@example.com",
   "password": "ññññññññññññññññññññññññññññññññññññññññ"
 }
+
+### ==========================================
+### CARÁCTER NULO
+### ==========================================
+
+### 23. Registro con un carácter nulo en el nombre: PostgreSQL no lo admite (422)
+POST {{auth}}/register
+Content-Type: application/json
+
+{
+  "username": "nulo",
+  "full_name": "Ana\u0000Paz",
+  "email": "nulo@example.com",
+  "password": "Nulo12345!"
+}
+
+### 24. Login con un carácter nulo en el usuario: credenciales inválidas, no un 500 (401)
+POST {{auth}}/token
+Content-Type: application/x-www-form-urlencoded
+
+username=ma%00ria&password=Maria1234!

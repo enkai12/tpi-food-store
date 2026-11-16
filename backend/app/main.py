@@ -1,7 +1,11 @@
+import math
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.encoders import jsonable_encoder
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from app.core.config import settings
 from app.core.database import create_all_tables
@@ -29,6 +33,20 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+def _numero_para_json(numero: float) -> float | str:
+    # NaN e Infinity no existen en JSON: si el cliente los mandó, los devuelvo como texto
+    return numero if math.isfinite(numero) else str(numero)
+
+
+# El mismo 422 de FastAPI, con una diferencia: el detalle repite el dato recibido, y si era
+# NaN o Infinity, la respuesta no se podía escribir en JSON y terminaba en un 500
+@app.exception_handler(RequestValidationError)
+async def error_de_validacion(request: Request, exc: RequestValidationError) -> JSONResponse:
+    detalle = jsonable_encoder(exc.errors(), custom_encoder={float: _numero_para_json})
+    return JSONResponse(status_code=422, content={"detail": detalle})
+
 
 # Todos los endpoints quedan bajo /api/v1
 app.include_router(auth_router, prefix="/api/v1")

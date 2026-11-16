@@ -430,3 +430,68 @@ GET {{productos}}?categoria_id=0
 
 ### 61. disponible que no es un booleano (422)
 GET {{productos}}?disponible=quizas
+
+### ==========================================
+### ENTRADAS FUERA DE RANGO (sesión del admin)
+### ==========================================
+
+### 62. Login del admin (200)
+POST {{auth}}/token
+Content-Type: application/x-www-form-urlencoded
+
+username=admin&password=Admin1234!
+
+### 63. Precio Infinity: JSON lo acepta, pero no es un precio (422)
+POST {{productos}}
+Content-Type: application/json
+
+{
+  "nombre": "Infinita",
+  "precio_base": Infinity,
+  "categoria_id": 1
+}
+
+### 64. Precio NaN: el 422 se puede escribir aunque repita el dato (422)
+POST {{productos}}
+Content-Type: application/json
+
+{
+  "nombre": "Sin número",
+  "precio_base": NaN,
+  "categoria_id": 1
+}
+
+### 65. Stock mayor que el máximo de la columna integer (422)
+PATCH {{productos}}/1/stock
+Content-Type: application/json
+
+{
+  "stock": 3000000000,
+  "disponible": true
+}
+
+### 66. Nombre de 101 caracteres: el máximo es 100 (422)
+POST {{productos}}
+Content-Type: application/json
+
+{
+  "nombre": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+  "precio_base": 1000,
+  "categoria_id": 1
+}
+
+### 67. Nombre con un carácter nulo (422)
+POST {{productos}}
+Content-Type: application/json
+
+{
+  "nombre": "Pizza\u0000",
+  "precio_base": 1000,
+  "categoria_id": 1
+}
+
+### 68. Buscar con un carácter nulo (422)
+GET {{productos}}?search=a%00b
+
+### 69. skip mayor que el máximo (422)
+GET {{productos}}?skip=2147483648

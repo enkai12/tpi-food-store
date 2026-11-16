@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, Path, Query, status
 
 from app.core.database import session_factory
 from app.core.deps import Admin
+from app.core.validaciones import ENTERO_MAX, SinNulos
 from app.modules.categorias.service import CategoriaNoEncontrada
 from app.modules.productos.schemas import (
     ProductoCreate,
@@ -27,9 +28,9 @@ def get_producto_service() -> ProductoService:
 @router.get("", response_model=ProductosPaginados)
 def listar_productos(
     service: Annotated[ProductoService, Depends(get_producto_service)],
-    skip: Annotated[int, Query(ge=0)] = 0,
+    skip: Annotated[int, Query(ge=0, le=ENTERO_MAX)] = 0,
     limit: Annotated[int, Query(ge=1, le=100)] = 20,
-    search: Annotated[str | None, Query(max_length=100)] = None,
+    search: Annotated[str | None, Query(max_length=100), SinNulos] = None,
     categoria_id: Annotated[int | None, Query(gt=0)] = None,
     disponible: bool | None = None,
 ):

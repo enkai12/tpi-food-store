@@ -46,6 +46,10 @@ class AuthService:
             raise UsuarioDuplicado("El nombre de usuario o el email ya están en uso")
 
     def autenticar(self, username: str, password: str) -> str:
+        # El formulario no pasa por un schema: un carácter nulo haría fallar a la base o a
+        # bcrypt con un 500. Ninguna credencial válida lo tiene, así que es un 401 más
+        if "\x00" in username or "\x00" in password:
+            raise CredencialesInvalidas()
         with self.uow as uow:
             # El formulario del login no pasa por UserCreate: normalizo igual que el registro
             usuario = uow.usuarios.get_by_username(username.strip().lower())
