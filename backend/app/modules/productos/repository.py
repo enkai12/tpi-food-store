@@ -14,6 +14,16 @@ class ProductoRepository(BaseRepository[Producto]):
     def __init__(self, session: Session) -> None:
         super().__init__(session, Producto)
 
+    def list_for_update(self, ids: list[int]) -> list[Producto]:
+        # SELECT ... FOR UPDATE: bloquea estas filas hasta el commit o el rollback. Si otro
+        # pedido quiere los mismos productos, espera a que este termine y lee el stock ya
+        # descontado. Ordenar por id hace que dos pedidos bloqueen siempre en el mismo
+        # orden, así nunca quedan esperándose uno al otro
+        consulta = (
+            select(Producto).where(Producto.id.in_(ids)).order_by(Producto.id).with_for_update()
+        )
+        return list(self.session.exec(consulta).all())
+
     def search(
         self,
         skip: int,

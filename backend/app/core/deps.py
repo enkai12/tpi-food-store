@@ -73,3 +73,6 @@ def require_role(allowed_roles: list[str]):
 
 # Para no repetir la dependencia en cada endpoint de admin. Devuelve al admin de la sesión
 Admin = Annotated[UserPublic, Depends(require_role(["admin"]))]
+
+# Cualquier usuario con sesión y la cuenta activa (user o admin). Devuelve al usuario
+UsuarioActivo = Annotated[UserPublic, Depends(get_current_active_user)]

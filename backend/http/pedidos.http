@@ -1,0 +1,230 @@
+# Pedidos (parte 1): crear el pedido con RN-01 y RN-06.
+# Con una base nueva, correr antes el seed, auth.http, usuarios.http, categorias.http y
+# productos.http. Productos que quedan: 1 Muzzarella (stock 12, $9000), 2 Empanada de carne
+# (40, $1200), 3 Fugazzeta (de baja), 4 Agua mineral (24, $1600, de una categoría de baja),
+# 5 Napolitana (no disponible), 6 Empanada de pollo (30, $1200) y 7 Promo 50% (10, $4250).
+@baseUrl = http://localhost:8000
+@auth = {{baseUrl}}/api/v1/auth
+@pedidos = {{baseUrl}}/api/v1/pedidos
+@productos = {{baseUrl}}/api/v1/productos
+
+### ==========================================
+### SESIÓN
+### ==========================================
+
+### 1. Logout, por si quedó abierta la sesión del archivo anterior (200)
+POST {{auth}}/logout
+
+### 2. Crear un pedido sin sesión (401)
+POST {{pedidos}}
+Content-Type: application/json
+
+{
+  "items": [{ "producto_id": 1, "cantidad": 1 }],
+  "forma_pago": "EFECTIVO",
+  "direccion_entrega": "Av. San Martín 1234"
+}
+
+### 3. Login de maría (200)
+POST {{auth}}/token
+Content-Type: application/x-www-form-urlencoded
+
+username=maria&password=Maria1234!
+
+### ==========================================
+### VALIDACIÓN DEL SCHEMA (RN-06)
+### ==========================================
+
+### 4. Sin ítems (422)
+POST {{pedidos}}
+Content-Type: application/json
+
+{
+  "items": [],
+  "forma_pago": "EFECTIVO",
+  "direccion_entrega": "Av. San Martín 1234"
+}
+
+### 5. Cantidad 0 (422)
+POST {{pedidos}}
+Content-Type: application/json
+
+{
+  "items": [{ "producto_id": 1, "cantidad": 0 }],
+  "forma_pago": "EFECTIVO",
+  "direccion_entrega": "Av. San Martín 1234"
+}
+
+### 6. Forma de pago que no existe (422)
+POST {{pedidos}}
+Content-Type: application/json
+
+{
+  "items": [{ "producto_id": 1, "cantidad": 1 }],
+  "forma_pago": "TARJETA",
+  "direccion_entrega": "Av. San Martín 1234"
+}
+
+### 7. Dirección de 4 caracteres: el mínimo es 5 (422)
+POST {{pedidos}}
+Content-Type: application/json
+
+{
+  "items": [{ "producto_id": 1, "cantidad": 1 }],
+  "forma_pago": "EFECTIVO",
+  "direccion_entrega": "Av 1"
+}
+
+### 8. Dirección de solo espacios (422)
+POST {{pedidos}}
+Content-Type: application/json
+
+{
+  "items": [{ "producto_id": 1, "cantidad": 1 }],
+  "forma_pago": "EFECTIVO",
+  "direccion_entrega": "          "
+}
+
+### ==========================================
+### REGLAS DE NEGOCIO (RN-01): nada se guarda
+### ==========================================
+
+### 9. Producto repetido entre los ítems (400)
+POST {{pedidos}}
+Content-Type: application/json
+
+{
+  "items": [
+    { "producto_id": 1, "cantidad": 1 },
+    { "producto_id": 2, "cantidad": 1 },
+    { "producto_id": 1, "cantidad": 2 }
+  ],
+  "forma_pago": "EFECTIVO",
+  "direccion_entrega": "Av. San Martín 1234"
+}
+
+### 10. Producto que no existe (404)
+POST {{pedidos}}
+Content-Type: application/json
+
+{
+  "items": [{ "producto_id": 999, "cantidad": 1 }],
+  "forma_pago": "EFECTIVO",
+  "direccion_entrega": "Av. San Martín 1234"
+}
+
+### 11. Producto dado de baja, la Fugazzeta (404)
+POST {{pedidos}}
+Content-Type: application/json
+
+{
+  "items": [{ "producto_id": 3, "cantidad": 1 }],
+  "forma_pago": "EFECTIVO",
+  "direccion_entrega": "Av. San Martín 1234"
+}
+
+### 12. Producto no disponible, la Napolitana (400)
+POST {{pedidos}}
+Content-Type: application/json
+
+{
+  "items": [{ "producto_id": 5, "cantidad": 1 }],
+  "forma_pago": "EFECTIVO",
+  "direccion_entrega": "Av. San Martín 1234"
+}
+
+### 13. Más agua de la que hay: quedan 24 (400)
+POST {{pedidos}}
+Content-Type: application/json
+
+{
+  "items": [{ "producto_id": 4, "cantidad": 25 }],
+  "forma_pago": "EFECTIVO",
+  "direccion_entrega": "Av. San Martín 1234"
+}
+
+### 14. La Muzzarella pasa, pero faltan empanadas: se deshace todo (400)
+POST {{pedidos}}
+Content-Type: application/json
+
+{
+  "items": [
+    { "producto_id": 1, "cantidad": 2 },
+    { "producto_id": 2, "cantidad": 41 }
+  ],
+  "forma_pago": "EFECTIVO",
+  "direccion_entrega": "Av. San Martín 1234"
+}
+
+### 15. La Muzzarella sigue con 12: el descuento del pedido anterior no quedó (200)
+GET {{productos}}/1
+
+### ==========================================
+### CREAR
+### ==========================================
+
+### 16. maría compra 2 Muzzarella y 3 Empanadas de carne: total 21600 (201)
+POST {{pedidos}}
+Content-Type: application/json
+
+{
+  "items": [
+    { "producto_id": 1, "cantidad": 2 },
+    { "producto_id": 2, "cantidad": 3 }
+  ],
+  "forma_pago": "EFECTIVO",
+  "direccion_entrega": "  Av. San Martín 1234  ",
+  "notas": "Tocar timbre B"
+}
+
+### 17. Ahora quedan 10 Muzzarella (200)
+GET {{productos}}/1
+
+### 18. Comprar todo el stock de la Promo 50%, por transferencia (201)
+POST {{pedidos}}
+Content-Type: application/json
+
+{
+  "items": [{ "producto_id": 7, "cantidad": 10 }],
+  "forma_pago": "TRANSFERENCIA",
+  "direccion_entrega": "Belgrano 567, piso 2"
+}
+
+### 19. Ya no queda Promo 50% (400)
+POST {{pedidos}}
+Content-Type: application/json
+
+{
+  "items": [{ "producto_id": 7, "cantidad": 1 }],
+  "forma_pago": "EFECTIVO",
+  "direccion_entrega": "Belgrano 567, piso 2"
+}
+
+### 20. El agua se puede comprar aunque su categoría esté de baja (H44) (201)
+POST {{pedidos}}
+Content-Type: application/json
+
+{
+  "items": [{ "producto_id": 4, "cantidad": 6 }],
+  "forma_pago": "EFECTIVO",
+  "direccion_entrega": "Mitre 89"
+}
+
+### 21. Login del admin (200)
+POST {{auth}}/token
+Content-Type: application/x-www-form-urlencoded
+
+username=admin&password=Admin1234!
+
+### 22. El admin también puede comprar (201)
+POST {{pedidos}}
+Content-Type: application/json
+
+{
+  "items": [{ "producto_id": 6, "cantidad": 2 }],
+  "forma_pago": "TRANSFERENCIA",
+  "direccion_entrega": "Oficina central"
+}
+
+### 23. Logout (200)
+POST {{auth}}/logout
