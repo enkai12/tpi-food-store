@@ -13,7 +13,9 @@ class RegistroDuplicado(Exception):
 def _es_duplicado(error: BaseException | None) -> bool:
     # Solo la violación de unicidad (código 23505 de PostgreSQL); cualquier otro error de
     # integridad es un error del programa y tiene que seguir siendo un 500
-    return isinstance(error, IntegrityError) and getattr(error.orig, "pgcode", None) == UNIQUE_VIOLATION
+    if not isinstance(error, IntegrityError):
+        return False
+    return getattr(error.orig, "pgcode", None) == UNIQUE_VIOLATION
 
 
 class UnitOfWork:
