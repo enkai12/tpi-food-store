@@ -155,3 +155,38 @@ Content-Type: application/json
   "email": "otra.maria@example.com",
   "password": "Maria1234!"
 }
+
+### ==========================================
+### MAYÚSCULAS EN EL USUARIO Y EL EMAIL
+### ==========================================
+
+### 18. Registrar "MARIA": se guarda en minúsculas y choca con maría (409)
+POST {{auth}}/register
+Content-Type: application/json
+
+{
+  "username": "MARIA",
+  "full_name": "Otra María",
+  "email": "otra.maria@example.com",
+  "password": "Maria1234!"
+}
+
+### 19. Registrar con el email de maría en mayúsculas (409)
+POST {{auth}}/register
+Content-Type: application/json
+
+{
+  "username": "mariela",
+  "full_name": "Mariela Paz",
+  "email": "MARIA@EXAMPLE.COM",
+  "password": "Mariela1234!"
+}
+
+### 20. Login con "MARIA": es la misma cuenta (200)
+POST {{auth}}/token
+Content-Type: application/x-www-form-urlencoded
+
+username=MARIA&password=Maria1234!
+
+### 21. Logout, para que usuarios.http arranque sin sesión (200)
+POST {{auth}}/logout

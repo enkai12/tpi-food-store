@@ -42,7 +42,8 @@ class AuthService:
 
     def autenticar(self, username: str, password: str) -> str:
         with self.uow as uow:
-            usuario = uow.usuarios.get_by_username(username)
+            # El formulario del login no pasa por UserCreate: normalizo igual que el registro
+            usuario = uow.usuarios.get_by_username(username.strip().lower())
             # Mismo error si no existe el usuario o si la contraseña no coincide:
             # así no se puede averiguar qué nombres de usuario existen
             if usuario is None or not verify_password(password, usuario.hashed_password):
