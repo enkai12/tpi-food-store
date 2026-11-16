@@ -1,0 +1,325 @@
+# Productos: detalle público y ABM del admin con stock y baja lógica.
+# Con una base nueva, correr antes el seed, auth.http, usuarios.http y categorias.http:
+# quedan Pizzas (1) y Empanadas (2) activas y Postres (3) dada de baja.
+# Los productos que se crean acá quedan con los ids 1 a 4, y la categoría Bebidas con el 4.
+@baseUrl = http://localhost:8000
+@auth = {{baseUrl}}/api/v1/auth
+@productos = {{baseUrl}}/api/v1/productos
+@categorias = {{baseUrl}}/api/v1/categorias
+
+### ==========================================
+### PERMISOS
+### ==========================================
+
+### 1. Logout, por si quedó abierta la sesión del archivo anterior (200)
+POST {{auth}}/logout
+
+### 2. Crear sin sesión (401)
+POST {{productos}}
+Content-Type: application/json
+
+{
+  "nombre": "Muzzarella",
+  "precio_base": 8500,
+  "categoria_id": 1
+}
+
+### 3. Login de maría, que es user (200)
+POST {{auth}}/token
+Content-Type: application/x-www-form-urlencoded
+
+username=maria&password=Maria1234!
+
+### 4. Crear con sesión de user (403)
+POST {{productos}}
+Content-Type: application/json
+
+{
+  "nombre": "Muzzarella",
+  "precio_base": 8500,
+  "categoria_id": 1
+}
+
+### 5. Login del admin (200)
+POST {{auth}}/token
+Content-Type: application/x-www-form-urlencoded
+
+username=admin&password=Admin1234!
+
+### ==========================================
+### CREAR
+### ==========================================
+
+### 6. Crear Muzzarella en Pizzas: la respuesta trae la categoría anidada (201)
+POST {{productos}}
+Content-Type: application/json
+
+{
+  "nombre": "Muzzarella",
+  "descripcion": "Salsa de tomate, muzzarella y aceitunas",
+  "precio_base": 8500,
+  "stock": 12,
+  "categoria_id": 1
+}
+
+### 7. Crear sin stock ni disponible: valen 0 y true por defecto (201)
+POST {{productos}}
+Content-Type: application/json
+
+{
+  "nombre": "Empanada de carne",
+  "precio_base": 1200,
+  "categoria_id": 2
+}
+
+### 8. Crear Fugazzeta, que se da de baja más abajo (201)
+POST {{productos}}
+Content-Type: application/json
+
+{
+  "nombre": "Fugazzeta",
+  "precio_base": 9000,
+  "stock": 5,
+  "categoria_id": 1
+}
+
+### 9. Crear con una categoría que no existe (404)
+POST {{productos}}
+Content-Type: application/json
+
+{
+  "nombre": "Flan",
+  "precio_base": 3000,
+  "categoria_id": 999
+}
+
+### 10. Crear en Postres, que está dada de baja (404)
+POST {{productos}}
+Content-Type: application/json
+
+{
+  "nombre": "Flan",
+  "precio_base": 3000,
+  "categoria_id": 3
+}
+
+### 11. Precio negativo (422)
+POST {{productos}}
+Content-Type: application/json
+
+{
+  "nombre": "Flan",
+  "precio_base": -1,
+  "categoria_id": 1
+}
+
+### 12. Stock negativo (422)
+POST {{productos}}
+Content-Type: application/json
+
+{
+  "nombre": "Flan",
+  "precio_base": 3000,
+  "stock": -5,
+  "categoria_id": 1
+}
+
+### 13. Nombre de solo espacios (422)
+POST {{productos}}
+Content-Type: application/json
+
+{
+  "nombre": "   ",
+  "precio_base": 3000,
+  "categoria_id": 1
+}
+
+### ==========================================
+### DETALLE (público)
+### ==========================================
+
+### 14. Logout, para probar el detalle sin sesión (200)
+POST {{auth}}/logout
+
+### 15. Detalle de la Muzzarella sin sesión, con su categoría (200)
+GET {{productos}}/1
+
+### 16. Detalle de un producto que no existe (404)
+GET {{productos}}/999
+
+### 17. Detalle con un id que no es positivo (422)
+GET {{productos}}/0
+
+### 18. Actualizar sin sesión: las escrituras siguen protegidas (401)
+PUT {{productos}}/1
+Content-Type: application/json
+
+{
+  "precio_base": 1
+}
+
+### 19. Login del admin (200)
+POST {{auth}}/token
+Content-Type: application/x-www-form-urlencoded
+
+username=admin&password=Admin1234!
+
+### ==========================================
+### ACTUALIZAR (PUT parcial)
+### ==========================================
+
+### 20. Cambiar solo el precio: el resto queda como estaba (200)
+PUT {{productos}}/1
+Content-Type: application/json
+
+{
+  "precio_base": 9000
+}
+
+### 21. Mandar el nombre en null: es obligatorio (422)
+PUT {{productos}}/1
+Content-Type: application/json
+
+{
+  "nombre": null
+}
+
+### 22. Pasarla a Empanadas: la categoría anidada cambia (200)
+PUT {{productos}}/1
+Content-Type: application/json
+
+{
+  "categoria_id": 2
+}
+
+### 23. Devolverla a Pizzas (200)
+PUT {{productos}}/1
+Content-Type: application/json
+
+{
+  "categoria_id": 1
+}
+
+### 24. Pasarla a Postres, que está dada de baja: no cambia nada (404)
+PUT {{productos}}/1
+Content-Type: application/json
+
+{
+  "precio_base": 1,
+  "categoria_id": 3
+}
+
+### 25. Actualizar un producto que no existe (404)
+PUT {{productos}}/999
+Content-Type: application/json
+
+{
+  "precio_base": 1
+}
+
+### ==========================================
+### STOCK (PATCH)
+### ==========================================
+
+### 26. Cargar stock a la empanada (200)
+PATCH {{productos}}/2/stock
+Content-Type: application/json
+
+{
+  "stock": 40,
+  "disponible": true
+}
+
+### 27. Sin disponible: los dos campos son obligatorios (422)
+PATCH {{productos}}/2/stock
+Content-Type: application/json
+
+{
+  "stock": 40
+}
+
+### 28. Stock negativo (422)
+PATCH {{productos}}/2/stock
+Content-Type: application/json
+
+{
+  "stock": -1,
+  "disponible": true
+}
+
+### 29. Stock de un producto que no existe (404)
+PATCH {{productos}}/999/stock
+Content-Type: application/json
+
+{
+  "stock": 1,
+  "disponible": true
+}
+
+### ==========================================
+### BAJA LÓGICA
+### ==========================================
+
+### 30. Dar de baja la Fugazzeta: sin cuerpo en la respuesta (204)
+DELETE {{productos}}/3
+
+### 31. Su detalle responde como si no existiera (404)
+GET {{productos}}/3
+
+### 32. Tampoco se puede actualizar (404)
+PUT {{productos}}/3
+Content-Type: application/json
+
+{
+  "precio_base": 1
+}
+
+### 33. Ni cambiarle el stock (404)
+PATCH {{productos}}/3/stock
+Content-Type: application/json
+
+{
+  "stock": 1,
+  "disponible": true
+}
+
+### 34. Darla de baja otra vez (404)
+DELETE {{productos}}/3
+
+### ==========================================
+### PRODUCTO DE UNA CATEGORÍA DADA DE BAJA
+### ==========================================
+
+### 35. Crear la categoría Bebidas (201)
+POST {{categorias}}
+Content-Type: application/json
+
+{
+  "nombre": "Bebidas"
+}
+
+### 36. Crear Agua mineral en Bebidas (201)
+POST {{productos}}
+Content-Type: application/json
+
+{
+  "nombre": "Agua mineral",
+  "precio_base": 1500,
+  "stock": 24,
+  "categoria_id": 4
+}
+
+### 37. Dar de baja Bebidas (204)
+DELETE {{categorias}}/4
+
+### 38. El agua sigue: la baja de la categoría no oculta sus productos (200)
+GET {{productos}}/4
+
+### 39. Editarle el precio mandando su misma categoría: no la está cambiando (200)
+PUT {{productos}}/4
+Content-Type: application/json
+
+{
+  "precio_base": 1600,
+  "categoria_id": 4
+}
