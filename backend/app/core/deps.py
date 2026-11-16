@@ -69,3 +69,7 @@ def require_role(allowed_roles: list[str]):
         return current_user
 
     return role_checker
+
+
+# Para no repetir la dependencia en cada endpoint de admin. Devuelve al admin de la sesión
+Admin = Annotated[UserPublic, Depends(require_role(["admin"]))]

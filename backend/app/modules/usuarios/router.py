@@ -3,7 +3,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, Path, status
 
 from app.core.database import session_factory
-from app.core.deps import require_role
+from app.core.deps import Admin
 from app.modules.usuarios.schemas import UserPublic
 from app.modules.usuarios.service import (
     NoPuedeDesactivarse,
@@ -13,9 +13,6 @@ from app.modules.usuarios.service import (
 from app.modules.usuarios.unit_of_work import UsuarioUnitOfWork
 
 router = APIRouter(prefix="/admin/usuarios", tags=["usuarios"])
-
-# Todas las rutas de este router son solo para el admin
-Admin = Annotated[UserPublic, Depends(require_role(["admin"]))]
 
 
 def get_usuario_service() -> UsuarioService:

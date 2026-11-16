@@ -1,0 +1,221 @@
+# Categorías: lecturas públicas y ABM del admin con baja lógica.
+# Con una base nueva, correr antes el seed, auth.http y usuarios.http. Las categorías
+# que se crean acá quedan con los ids 1, 2 y 3.
+@baseUrl = http://localhost:8000
+@auth = {{baseUrl}}/api/v1/auth
+@categorias = {{baseUrl}}/api/v1/categorias
+
+### ==========================================
+### PERMISOS
+### ==========================================
+
+### 1. Listado sin sesión: es público y todavía no hay categorías (200)
+GET {{categorias}}
+
+### 2. Logout, por si quedó abierta la sesión del archivo anterior (200)
+POST {{auth}}/logout
+
+### 3. Crear sin sesión (401)
+POST {{categorias}}
+Content-Type: application/json
+
+{
+  "nombre": "Pizzas"
+}
+
+### 4. Login de maría, que es user (200)
+POST {{auth}}/token
+Content-Type: application/x-www-form-urlencoded
+
+username=maria&password=Maria1234!
+
+### 5. Crear con sesión de user (403)
+POST {{categorias}}
+Content-Type: application/json
+
+{
+  "nombre": "Pizzas"
+}
+
+### 6. Login del admin (200)
+POST {{auth}}/token
+Content-Type: application/x-www-form-urlencoded
+
+username=admin&password=Admin1234!
+
+### ==========================================
+### CREAR
+### ==========================================
+
+### 7. Crear Pizzas (201)
+POST {{categorias}}
+Content-Type: application/json
+
+{
+  "nombre": "Pizzas",
+  "descripcion": "Pizzas a la piedra"
+}
+
+### 8. Crear Empanadas (201)
+POST {{categorias}}
+Content-Type: application/json
+
+{
+  "nombre": "Empanadas",
+  "descripcion": "Empanadas al horno"
+}
+
+### 9. Crear Postres, sin descripción: es opcional (201)
+POST {{categorias}}
+Content-Type: application/json
+
+{
+  "nombre": "Postres"
+}
+
+### 10. Nombre repetido (409)
+POST {{categorias}}
+Content-Type: application/json
+
+{
+  "nombre": "Pizzas"
+}
+
+### 11. Nombre de un solo carácter (422)
+POST {{categorias}}
+Content-Type: application/json
+
+{
+  "nombre": "P"
+}
+
+### 12. Sin nombre (422)
+POST {{categorias}}
+Content-Type: application/json
+
+{
+  "descripcion": "Sin nombre"
+}
+
+### ==========================================
+### LEER (públicas)
+### ==========================================
+
+### 13. Listado: las tres, ordenadas por id (200)
+GET {{categorias}}
+
+### 14. Detalle de Pizzas (200)
+GET {{categorias}}/1
+
+### 15. Detalle de una categoría que no existe (404)
+GET {{categorias}}/999
+
+### 16. Detalle con un id que no es positivo (422)
+GET {{categorias}}/0
+
+### ==========================================
+### ACTUALIZAR (PUT parcial)
+### ==========================================
+
+### 17. Cambiar solo la descripción: el nombre queda como estaba (200)
+PUT {{categorias}}/1
+Content-Type: application/json
+
+{
+  "descripcion": "Pizzas a la piedra y a la parrilla"
+}
+
+### 18. Ponerle el nombre de otra categoría (409)
+PUT {{categorias}}/1
+Content-Type: application/json
+
+{
+  "nombre": "Empanadas"
+}
+
+### 19. Mandar su mismo nombre: no choca consigo misma (200)
+PUT {{categorias}}/1
+Content-Type: application/json
+
+{
+  "nombre": "Pizzas"
+}
+
+### 20. Mandar el nombre en null: es obligatorio (422)
+PUT {{categorias}}/1
+Content-Type: application/json
+
+{
+  "nombre": null
+}
+
+### 21. Mandar la descripción en null: es opcional, así que se borra (200)
+PUT {{categorias}}/1
+Content-Type: application/json
+
+{
+  "descripcion": null
+}
+
+### 22. Actualizar una categoría que no existe (404)
+PUT {{categorias}}/999
+Content-Type: application/json
+
+{
+  "descripcion": "No existe"
+}
+
+### ==========================================
+### BAJA LÓGICA
+### ==========================================
+
+### 23. Dar de baja Postres: sin cuerpo en la respuesta (204)
+DELETE {{categorias}}/3
+
+### 24. El listado ya no la muestra (200)
+GET {{categorias}}
+
+### 25. Su detalle responde como si no existiera (404)
+GET {{categorias}}/3
+
+### 26. Tampoco se puede actualizar (404)
+PUT {{categorias}}/3
+Content-Type: application/json
+
+{
+  "descripcion": "Dada de baja"
+}
+
+### 27. Darla de baja otra vez (404)
+DELETE {{categorias}}/3
+
+### 28. Crear otra con el mismo nombre: la baja no libera el nombre (409)
+POST {{categorias}}
+Content-Type: application/json
+
+{
+  "nombre": "Postres"
+}
+
+### 29. Dar de baja una categoría que no existe (404)
+DELETE {{categorias}}/999
+
+### ==========================================
+### ESPACIOS EN EL NOMBRE
+### ==========================================
+
+### 30. Crear con un nombre de solo espacios (422)
+POST {{categorias}}
+Content-Type: application/json
+
+{
+  "nombre": "   "
+}
+
+### 31. Crear "  Empanadas  ": se recortan los espacios y choca con la existente (409)
+POST {{categorias}}
+Content-Type: application/json
+
+{
+  "nombre": "  Empanadas  "
+}
