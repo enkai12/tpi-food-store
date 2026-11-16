@@ -9,6 +9,11 @@ class PedidoRepository(BaseRepository[Pedido]):
     def __init__(self, session: Session) -> None:
         super().__init__(session, Pedido)
 
+    def get_for_update(self, id: int) -> Pedido | None:
+        # Como get_by_id, pero bloquea la fila hasta el commit: dos cambios de estado del mismo
+        # pedido se hacen de a uno, y el segundo ve lo que dejó el primero
+        return self.session.exec(select(Pedido).where(Pedido.id == id).with_for_update()).first()
+
     def list_by_usuario(
         self,
         usuario_id: int | None,

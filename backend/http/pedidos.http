@@ -1,4 +1,5 @@
-# Pedidos: crear el pedido con RN-01 y RN-06 (parte 1) y listarlos y verlos con RN-04 (parte 2).
+# Pedidos: crear el pedido con RN-01 y RN-06 (parte 1), listarlos y verlos con RN-04 (parte 2)
+# y cambiar su estado o cancelarlos con RN-02 a RN-04 (parte 3).
 # Con una base nueva, correr antes el seed, auth.http, usuarios.http, categorias.http y
 # productos.http. Productos que quedan: 1 Muzzarella (stock 12, $9000), 2 Empanada de carne
 # (40, $1200), 3 Fugazzeta (de baja), 4 Agua mineral (24, $1600, de una categoría de baja),
@@ -304,4 +305,140 @@ GET {{pedidos}}
 GET {{pedidos}}/1
 
 ### 42. Logout (200)
+POST {{auth}}/logout
+
+### ==========================================
+### ESTADOS Y CANCELACIÓN (RN-02 a RN-04)
+### Pedidos: 1 a 3 de maría, 4 del admin y 5 de pedro, todos en PENDIENTE
+### ==========================================
+
+### 43. Cambiar el estado sin sesión (401)
+PATCH {{pedidos}}/1/estado
+Content-Type: application/json
+
+{
+  "estado": "EN_PREPARACION"
+}
+
+### 44. Login de maría (200)
+POST {{auth}}/token
+Content-Type: application/x-www-form-urlencoded
+
+username=maria&password=Maria1234!
+
+### 45. maría intenta cambiar un estado: solo el admin (403)
+PATCH {{pedidos}}/1/estado
+Content-Type: application/json
+
+{
+  "estado": "EN_PREPARACION"
+}
+
+### 46. maría intenta cancelar el pedido 5, que es de pedro (403)
+PATCH {{pedidos}}/5/cancelar
+
+### 47. maría cancela su pedido 2: vuelven las 10 Promo 50% (200)
+PATCH {{pedidos}}/2/cancelar
+
+### 48. La Promo 50% tiene otra vez 10 (200)
+GET {{productos}}/7
+
+### 49. Cancelar el 2 otra vez: ya no está en PENDIENTE (400)
+PATCH {{pedidos}}/2/cancelar
+
+### 50. Cancelar un pedido que no existe (404)
+PATCH {{pedidos}}/999/cancelar
+
+### 51. Login del admin (200)
+POST {{auth}}/token
+Content-Type: application/x-www-form-urlencoded
+
+username=admin&password=Admin1234!
+
+### 52. El admin pasa el pedido 1 a EN_PREPARACION (200)
+PATCH {{pedidos}}/1/estado
+Content-Type: application/json
+
+{
+  "estado": "EN_PREPARACION"
+}
+
+### 53. Volverlo a PENDIENTE no es una transición válida (400)
+PATCH {{pedidos}}/1/estado
+Content-Type: application/json
+
+{
+  "estado": "PENDIENTE"
+}
+
+### 54. El admin lo pasa a ENTREGADO (200)
+PATCH {{pedidos}}/1/estado
+Content-Type: application/json
+
+{
+  "estado": "ENTREGADO"
+}
+
+### 55. Cancelar un pedido ENTREGADO: es terminal (400)
+PATCH {{pedidos}}/1/estado
+Content-Type: application/json
+
+{
+  "estado": "CANCELADO"
+}
+
+### 56. Un estado que no existe (422)
+PATCH {{pedidos}}/1/estado
+Content-Type: application/json
+
+{
+  "estado": "ENVIADO"
+}
+
+### 57. Cambiar el estado de un pedido que no existe (404)
+PATCH {{pedidos}}/999/estado
+Content-Type: application/json
+
+{
+  "estado": "EN_PREPARACION"
+}
+
+### 58. El admin pasa el pedido 3 a EN_PREPARACION (200)
+PATCH {{pedidos}}/3/estado
+Content-Type: application/json
+
+{
+  "estado": "EN_PREPARACION"
+}
+
+### 59. Y lo cancela desde EN_PREPARACION: vuelven las 6 aguas (200)
+PATCH {{pedidos}}/3/estado
+Content-Type: application/json
+
+{
+  "estado": "CANCELADO"
+}
+
+### 60. El agua tiene otra vez 24 (200)
+GET {{productos}}/4
+
+### 61. El admin no puede usar /cancelar con un pedido ajeno: es «Dueño» (403)
+PATCH {{pedidos}}/5/cancelar
+
+### 62. Pero sí con su propio pedido 4 (200)
+PATCH {{pedidos}}/4/cancelar
+
+### 63. Login de maría (200)
+POST {{auth}}/token
+Content-Type: application/x-www-form-urlencoded
+
+username=maria&password=Maria1234!
+
+### 64. maría intenta cancelar el 1, que ya está ENTREGADO (400)
+PATCH {{pedidos}}/1/cancelar
+
+### 65. Sus pedidos cancelados: el 2 y el 3 (200)
+GET {{pedidos}}?estado=CANCELADO
+
+### 66. Logout (200)
 POST {{auth}}/logout

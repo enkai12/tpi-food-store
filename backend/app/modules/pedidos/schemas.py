@@ -58,3 +58,8 @@ class PedidoRead(SQLModel):
 class PedidosPaginados(SQLModel):
     total: int
     items: list[PedidoRead]
+
+
+# Cuerpo del PATCH /estado: uno de los cuatro estados (la transición la valida el Service)
+class CambioEstado(SQLModel):
+    estado: EstadoPedido

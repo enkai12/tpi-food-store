@@ -13,8 +13,18 @@ class PedidoNoEncontrado(Exception):
 
 
 class PedidoAjeno(Exception):
-    def __init__(self) -> None:
-        super().__init__("No tenés permiso para ver este pedido")
+    def __init__(self, accion: str = "ver") -> None:
+        super().__init__(f"No tenés permiso para {accion} este pedido")
+
+
+class TransicionInvalida(Exception):
+    def __init__(self, actual: str, nuevo: str) -> None:
+        super().__init__(f"No se puede pasar un pedido de {actual} a {nuevo}")
+
+
+class PedidoNoCancelable(Exception):
+    def __init__(self, estado: str) -> None:
+        super().__init__(f"Solo se puede cancelar un pedido en PENDIENTE; este está en {estado}")
 
 
 class ProductoRepetido(Exception):
@@ -32,6 +42,16 @@ class StockInsuficiente(Exception):
         super().__init__(
             f"Stock insuficiente para '{nombre}': hay {stock} y se pidieron {cantidad}"
         )
+
+
+# La máquina de estados (RN-02): a qué estados puede pasar un pedido desde cada uno.
+# ENTREGADO y CANCELADO son terminales: no admiten cambios
+TRANSICIONES: dict[str, set[str]] = {
+    "PENDIENTE": {"EN_PREPARACION", "CANCELADO"},
+    "EN_PREPARACION": {"ENTREGADO", "CANCELADO"},
+    "ENTREGADO": set(),
+    "CANCELADO": set(),
+}
 
 
 class PedidoService:
@@ -121,4 +141,47 @@ class PedidoService:
             pedido.total = round(total, 2)
             # add hace el flush: INSERT del pedido y de sus líneas, y el id
             pedido = uow.pedidos.add(pedido)
+            return PedidoRead.model_validate(pedido)
+
+    # El pedido, bloqueado hasta el commit; 404 si no existe
+    def _obtener_bloqueado(self, uow: PedidoUnitOfWork, id: int) -> Pedido:
+        pedido = uow.pedidos.get_for_update(id)
+        if pedido is None:
+            raise PedidoNoEncontrado(id)
+        return pedido
+
+    # RN-03: cancelar devuelve el stock de cada línea, en la misma transacción que el cambio
+    # de estado. Los productos se bloquean ordenados por id, como al crear el pedido
+    def _restituir_stock(self, uow: PedidoUnitOfWork, pedido: Pedido) -> None:
+        ids = [linea.producto_id for linea in pedido.items]
+        productos = {p.id: p for p in uow.productos.list_for_update(ids)}
+        for linea in pedido.items:
+            productos[linea.producto_id].stock += linea.cantidad
+
+    def _pasar_a(self, uow: PedidoUnitOfWork, pedido: Pedido, nuevo: str) -> None:
+        if nuevo == "CANCELADO":
+            self._restituir_stock(uow, pedido)
+        pedido.estado = nuevo
+        pedido.updated_at = ahora_utc()  # cambia en cada cambio de estado (H32)
+
+    def cambiar_estado(self, id: int, nuevo: str) -> PedidoRead:
+        # El admin avanza o cancela según la máquina de estados (RN-02)
+        with self.uow as uow:
+            pedido = self._obtener_bloqueado(uow, id)
+            # La transición se valida antes de tocar nada
+            if nuevo not in TRANSICIONES[pedido.estado]:
+                raise TransicionInvalida(pedido.estado, nuevo)
+            self._pasar_a(uow, pedido, nuevo)
+            return PedidoRead.model_validate(pedido)
+
+    def cancelar(self, id: int, usuario_id: int) -> PedidoRead:
+        # El dueño cancela su pedido, solo en PENDIENTE (RN-04). Vale también para el admin
+        # con sus propios pedidos; los ajenos los cancela con PATCH /estado
+        with self.uow as uow:
+            pedido = self._obtener_bloqueado(uow, id)
+            if pedido.usuario_id != usuario_id:
+                raise PedidoAjeno("cancelar")
+            if pedido.estado != "PENDIENTE":
+                raise PedidoNoCancelable(pedido.estado)
+            self._pasar_a(uow, pedido, "CANCELADO")
             return PedidoRead.model_validate(pedido)
