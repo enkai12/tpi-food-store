@@ -12,7 +12,8 @@ if TYPE_CHECKING:
 
 class Pedido(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
-    usuario_id: int = Field(foreign_key="usuario.id")
+    # Índice en la FK: «mis pedidos» filtra por usuario
+    usuario_id: int = Field(foreign_key="usuario.id", index=True)
     estado: str = "PENDIENTE"
     forma_pago: str  # "EFECTIVO" o "TRANSFERENCIA"
     direccion_entrega: str
@@ -29,8 +30,9 @@ class Pedido(SQLModel, table=True):
 # compra: si el producto cambia después, el pedido sigue igual
 class DetallePedido(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
-    pedido_id: int = Field(foreign_key="pedido.id")
-    producto_id: int = Field(foreign_key="producto.id")
+    # Índices en las FK: las líneas se buscan por pedido y por producto
+    pedido_id: int = Field(foreign_key="pedido.id", index=True)
+    producto_id: int = Field(foreign_key="producto.id", index=True)
     cantidad: int
     nombre_producto: str
     precio_unitario: float

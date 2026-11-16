@@ -9,7 +9,9 @@ if TYPE_CHECKING:
 
 class Producto(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
-    categoria_id: int = Field(foreign_key="categoria.id")
+    # PostgreSQL no indexa solas las claves foráneas: el índice acelera el filtro por
+    # categoría del catálogo y el JOIN con la categoría
+    categoria_id: int = Field(foreign_key="categoria.id", index=True)
     nombre: str
     descripcion: str | None = None
     precio_base: float
