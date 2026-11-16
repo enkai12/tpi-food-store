@@ -219,3 +219,31 @@ Content-Type: application/json
 {
   "nombre": "  Empanadas  "
 }
+
+### ==========================================
+### MAYÚSCULAS EN EL NOMBRE
+### ==========================================
+
+### 32. Crear "pizzas": choca con Pizzas aunque cambien las mayúsculas (409)
+POST {{categorias}}
+Content-Type: application/json
+
+{
+  "nombre": "pizzas"
+}
+
+### 33. Renombrar Pizzas a "PIZZAS": es la misma categoría, así que no choca (200)
+PUT {{categorias}}/1
+Content-Type: application/json
+
+{
+  "nombre": "PIZZAS"
+}
+
+### 34. Volver a "Pizzas" (200)
+PUT {{categorias}}/1
+Content-Type: application/json
+
+{
+  "nombre": "Pizzas"
+}
