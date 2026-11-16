@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Annotated
 
-from pydantic import AfterValidator, EmailStr, StringConstraints
+from pydantic import AfterValidator, EmailStr, StringConstraints, field_validator
 from sqlmodel import Field, SQLModel
 
 # Saca los espacios del principio y del final antes de medir: "   " no pasa
@@ -18,7 +18,16 @@ class UserCreate(SQLModel):
     username: Username
     full_name: TextoNoVacio
     email: Email
-    password: str = Field(min_length=8, max_length=72)  # bcrypt usa hasta 72 bytes
+    password: str = Field(min_length=8)
+
+    # bcrypt usa solo los primeros 72 bytes, y max_length cuenta caracteres: una «ñ» ocupa
+    # 2 bytes. Mido los bytes para que nunca se descarte parte de la contraseña
+    @field_validator("password")
+    @classmethod
+    def maximo_72_bytes(cls, password: str) -> str:
+        if len(password.encode("utf-8")) > 72:
+            raise ValueError("La contraseña no puede superar los 72 bytes")
+        return password
 
 
 # Lo que ve el cliente: nunca incluye hashed_password

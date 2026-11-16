@@ -190,3 +190,18 @@ username=MARIA&password=Maria1234!
 
 ### 21. Logout, para que usuarios.http arranque sin sesión (200)
 POST {{auth}}/logout
+
+### ==========================================
+### LARGO DE LA CONTRASEÑA EN BYTES
+### ==========================================
+
+### 22. Contraseña de 40 «ñ»: son 40 caracteres, pero 80 bytes, y bcrypt usa 72 (422)
+POST {{auth}}/register
+Content-Type: application/json
+
+{
+  "username": "lucia",
+  "full_name": "Lucía Ñañez",
+  "email": "lucia@example.com",
+  "password": "ññññññññññññññññññññññññññññññññññññññññ"
+}
