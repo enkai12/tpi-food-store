@@ -3,6 +3,8 @@ from typing import TYPE_CHECKING, Optional
 
 from sqlmodel import Field, Relationship, SQLModel
 
+from app.core.fechas import ConZona, ahora_utc
+
 if TYPE_CHECKING:
     from app.modules.productos.models import Producto
     from app.modules.usuarios.models import Usuario
@@ -16,8 +18,8 @@ class Pedido(SQLModel, table=True):
     direccion_entrega: str
     notas: str | None = None
     total: float  # suma de los subtotales; no cambia después de crear el pedido
-    created_at: datetime = Field(default_factory=datetime.now)
-    updated_at: datetime = Field(default_factory=datetime.now)
+    created_at: datetime = Field(default_factory=ahora_utc, sa_type=ConZona)
+    updated_at: datetime = Field(default_factory=ahora_utc, sa_type=ConZona)
 
     usuario: Optional["Usuario"] = Relationship(back_populates="pedidos")
     items: list["DetallePedido"] = Relationship(back_populates="pedido")
