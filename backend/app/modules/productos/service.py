@@ -4,6 +4,7 @@ from app.modules.productos.models import Producto
 from app.modules.productos.schemas import (
     ProductoCreate,
     ProductoRead,
+    ProductosPaginados,
     ProductoStockUpdate,
     ProductoUpdate,
 )
@@ -34,6 +35,19 @@ class ProductoService:
         if categoria is None or not categoria.activo:
             raise CategoriaNoEncontrada(categoria_id)
         return categoria
+
+    def listar(
+        self,
+        skip: int,
+        limit: int,
+        search: str | None = None,
+        categoria_id: int | None = None,
+        disponible: bool | None = None,
+    ) -> ProductosPaginados:
+        with self.uow as uow:
+            total, productos = uow.productos.search(skip, limit, search, categoria_id, disponible)
+            items = [ProductoRead.model_validate(p) for p in productos]
+            return ProductosPaginados(total=total, items=items)
 
     def obtener(self, id: int) -> ProductoRead:
         with self.uow as uow:

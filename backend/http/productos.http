@@ -1,7 +1,7 @@
 # Productos: detalle público y ABM del admin con stock y baja lógica.
 # Con una base nueva, correr antes el seed, auth.http, usuarios.http y categorias.http:
 # quedan Pizzas (1) y Empanadas (2) activas y Postres (3) dada de baja.
-# Los productos que se crean acá quedan con los ids 1 a 4, y la categoría Bebidas con el 4.
+# Los productos que se crean acá quedan con los ids 1 a 7, y la categoría Bebidas con el 4.
 @baseUrl = http://localhost:8000
 @auth = {{baseUrl}}/api/v1/auth
 @productos = {{baseUrl}}/api/v1/productos
@@ -323,3 +323,110 @@ Content-Type: application/json
   "precio_base": 1600,
   "categoria_id": 4
 }
+
+### ==========================================
+### LISTADO (público): más productos para probar
+### ==========================================
+
+### 40. Crear Napolitana, no disponible por ahora (201)
+POST {{productos}}
+Content-Type: application/json
+
+{
+  "nombre": "Napolitana",
+  "precio_base": 9500,
+  "stock": 8,
+  "disponible": false,
+  "categoria_id": 1
+}
+
+### 41. Crear Empanada de pollo (201)
+POST {{productos}}
+Content-Type: application/json
+
+{
+  "nombre": "Empanada de pollo",
+  "precio_base": 1200,
+  "stock": 30,
+  "categoria_id": 2
+}
+
+### 42. Crear Promo 50%, con un % en el nombre (201)
+POST {{productos}}
+Content-Type: application/json
+
+{
+  "nombre": "Promo 50%",
+  "precio_base": 4250,
+  "stock": 10,
+  "categoria_id": 1
+}
+
+### 43. Logout: el listado es público (200)
+POST {{auth}}/logout
+
+### ==========================================
+### LISTADO: PAGINACIÓN
+### ==========================================
+
+### 44. Sin filtros: los 6 activos por id; la Fugazzeta (de baja) no aparece y el agua sí (200)
+GET {{productos}}
+
+### 45. Primera página de 2 (200)
+GET {{productos}}?skip=0&limit=2
+
+### 46. Segunda página de 2: total sigue siendo 6 (200)
+GET {{productos}}?skip=2&limit=2
+
+### 47. Más allá del total: lista vacía, no un error (200)
+GET {{productos}}?skip=10&limit=2
+
+### ==========================================
+### LISTADO: BÚSQUEDA Y FILTROS
+### ==========================================
+
+### 48. Buscar EMPANADA: no distingue mayúsculas (200)
+GET {{productos}}?search=EMPANADA
+
+### 49. Buscar %: se busca como texto, no como comodín (200)
+GET {{productos}}?search=%25
+
+### 50. Buscar _: tampoco es comodín, y ningún nombre lo tiene (200)
+GET {{productos}}?search=_
+
+### 51. Buscar solo espacios: no filtra (200)
+GET {{productos}}?search=%20%20%20
+
+### 52. Solo la categoría Pizzas (200)
+GET {{productos}}?categoria_id=1
+
+### 53. Solo los no disponibles (200)
+GET {{productos}}?disponible=false
+
+### 54. Pizzas disponibles: los filtros se combinan (200)
+GET {{productos}}?categoria_id=1&disponible=true
+
+### 55. Bebidas, dada de baja: sus productos siguen apareciendo (200)
+GET {{productos}}?categoria_id=4
+
+### 56. Una categoría que no existe: lista vacía, no 404 (200)
+GET {{productos}}?categoria_id=999
+
+### ==========================================
+### LISTADO: PARÁMETROS INVÁLIDOS
+### ==========================================
+
+### 57. skip negativo (422)
+GET {{productos}}?skip=-1
+
+### 58. limit en 0 (422)
+GET {{productos}}?limit=0
+
+### 59. limit mayor que 100 (422)
+GET {{productos}}?limit=101
+
+### 60. categoria_id en 0 (422)
+GET {{productos}}?categoria_id=0
+
+### 61. disponible que no es un booleano (422)
+GET {{productos}}?disponible=quizas

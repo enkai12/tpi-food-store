@@ -48,3 +48,9 @@ class ProductoRead(SQLModel):
     activo: bool
     categoria_id: int
     categoria: CategoriaRead  # se arma desde la relación Producto.categoria
+
+
+# Una página del listado: total es la cantidad que cumple los filtros, no solo esta página
+class ProductosPaginados(SQLModel):
+    total: int
+    items: list[ProductoRead]
