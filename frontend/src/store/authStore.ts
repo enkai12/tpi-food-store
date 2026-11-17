@@ -62,11 +62,16 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
-      // La usan logout, checkSession y el interceptor. También vacía la caché de TanStack
-      // Query, para no mostrar datos de la cuenta anterior (por ejemplo, sus pedidos)
+      // La usan logout, checkSession y el interceptor
       limpiarSesion: () => {
-        queryClient.clear()
+        const habiaSesion = get().usuario !== null
         set({ usuario: null, cargando: false })
+        // Si había una cuenta, borro sus datos de la caché de TanStack Query (por ejemplo, sus
+        // pedidos), para que la próxima persona no los vea. resetQueries y no clear: clear
+        // cancela los pedidos en curso, y una pantalla que sigue montada (el catálogo) se
+        // quedaría cargando para siempre; reset deja la caché vacía y vuelve a pedir lo que
+        // está en pantalla. Sin sesión previa no hay nada que borrar
+        if (habiaSesion) queryClient.resetQueries()
       },
     }),
     {
