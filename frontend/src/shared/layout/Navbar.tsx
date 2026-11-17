@@ -1,6 +1,7 @@
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import type { Rol } from '@/features/auth'
 import { useAuthStore } from '@/store/authStore'
+import { useCartStore } from '@/store/cartStore'
 
 const NOMBRE_ROL: Record<Rol, string> = { admin: 'Administrador', user: 'Cliente' }
 
@@ -11,6 +12,7 @@ const claseEnlace = ({ isActive }: { isActive: boolean }) =>
 function Navbar() {
   const usuario = useAuthStore((s) => s.usuario)
   const logout = useAuthStore((s) => s.logout)
+  const enCarrito = useCartStore((s) => s.cantidadTotal())
   const navigate = useNavigate()
 
   async function cerrarSesion() {
@@ -36,8 +38,17 @@ function Navbar() {
             </NavLink>
           </li>
           <li>
-            <NavLink to="/carrito" className={claseEnlace}>
+            <NavLink
+              to="/carrito"
+              className={claseEnlace}
+              aria-label={enCarrito > 0 ? `Carrito, ${enCarrito} productos` : 'Carrito'}
+            >
               Carrito
+              {enCarrito > 0 && (
+                <span className="ml-1.5 rounded-full bg-white px-1.5 py-0.5 text-xs font-bold text-red-700">
+                  {enCarrito}
+                </span>
+              )}
             </NavLink>
           </li>
           {usuario && (

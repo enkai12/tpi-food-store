@@ -1,5 +1,7 @@
 import { useState } from 'react'
+import Button from '@/shared/ui/Button'
 import Card from '@/shared/ui/Card'
+import { useCartStore } from '@/store/cartStore'
 import { formatearPrecio } from '@/shared/utils/formato'
 import type { Producto } from '../types/producto'
 
@@ -9,6 +11,13 @@ function ProductoCard({ producto }: { producto: Producto }) {
   const imagen = falloImagen ? null : producto.imagen_url
   // Se muestran igual, marcados: el backend rechazaría el pedido (RN-01)
   const aviso = !producto.disponible ? 'No disponible' : producto.stock === 0 ? 'Sin stock' : null
+  const agregar = useCartStore((s) => s.agregar)
+  // Selecciono solo la cantidad de este producto: la tarjeta se vuelve a dibujar cuando cambia
+  // esa cantidad, no cuando cambia cualquier otra cosa del carrito
+  const enCarrito = useCartStore(
+    (s) => s.items.find((i) => i.producto_id === producto.id)?.cantidad ?? 0,
+  )
+  const alTope = enCarrito >= producto.stock
 
   return (
     <Card className="flex h-full flex-col overflow-hidden">
@@ -41,6 +50,20 @@ function ProductoCard({ producto }: { producto: Producto }) {
             </span>
           )}
         </div>
+        <Button
+          className="mt-3 w-full"
+          disabled={aviso !== null || alTope}
+          onClick={() => agregar(producto)}
+          // El nombre accesible dice qué producto agrega: en la grilla hay doce botones iguales
+          aria-label={`Agregar ${producto.nombre} al carrito`}
+        >
+          {aviso ?? (alTope ? 'No hay más stock' : 'Agregar al carrito')}
+        </Button>
+        {enCarrito > 0 && (
+          <p className="mt-2 text-center text-sm text-stone-600" aria-live="polite">
+            En el carrito: {enCarrito}
+          </p>
+        )}
       </div>
     </Card>
   )
