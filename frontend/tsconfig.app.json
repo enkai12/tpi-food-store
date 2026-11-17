@@ -16,6 +16,9 @@
     "noEmit": true,
     "jsx": "react-jsx",
 
+    /* Alias: @/ es src/. Vite lo lee de acá (tsconfigPaths en vite.config.ts) */
+    "paths": { "@/*": ["./src/*"] },
+
     /* Tipos: strict activa todos los controles (null, any implícito, etc.) */
     "strict": true,
 

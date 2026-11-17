@@ -1,4 +1,4 @@
-import type { EstadoPedido } from '../../features/pedidos/types/pedido'
+import type { EstadoPedido } from '@/features/pedidos'
 
 // Record obliga a cubrir los cuatro estados: si el backend sumara uno, TypeScript marcaría
 // este objeto hasta agregarlo

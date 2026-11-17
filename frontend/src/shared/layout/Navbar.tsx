@@ -1,6 +1,6 @@
 import { Link, NavLink, useNavigate } from 'react-router-dom'
-import type { Rol } from '../../features/auth/types/auth'
-import { useAuthStore } from '../../store/authStore'
+import type { Rol } from '@/features/auth'
+import { useAuthStore } from '@/store/authStore'
 
 const NOMBRE_ROL: Record<Rol, string> = { admin: 'Administrador', user: 'Cliente' }
 

@@ -1,7 +1,7 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom'
-import type { Rol } from '../features/auth/types/auth'
-import Skeleton from '../shared/components/Skeleton'
-import { useAuthStore } from '../store/authStore'
+import type { Rol } from '@/features/auth'
+import Skeleton from '@/shared/components/Skeleton'
+import { useAuthStore } from '@/store/authStore'
 
 interface ProtectedRouteProps {
   roles?: Rol[] // si no viene, alcanza con tener sesión

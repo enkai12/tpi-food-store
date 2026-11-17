@@ -1,10 +1,9 @@
 import axios from 'axios'
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
-import * as authApi from '../features/auth/api/auth'
-import type { Usuario, UsuarioSesion } from '../features/auth/types/auth'
-import { setUnauthorizedHandler } from '../shared/api/axiosInstance'
-import { queryClient } from '../shared/api/queryClient'
+import { authApi, type Usuario, type UsuarioSesion } from '@/features/auth'
+import { setUnauthorizedHandler } from '@/shared/api/axiosInstance'
+import { queryClient } from '@/shared/api/queryClient'
 
 interface AuthState {
   usuario: UsuarioSesion | null

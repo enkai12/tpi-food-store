@@ -1,8 +1,6 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
-import LoginPage from '../features/auth/pages/LoginPage'
-import RegisterPage from '../features/auth/pages/RegisterPage'
-import UnauthorizedPage from '../features/auth/pages/UnauthorizedPage'
-import MainLayout from '../shared/layout/MainLayout'
+import { LoginPage, RegisterPage, UnauthorizedPage } from '@/features/auth'
+import MainLayout from '@/shared/layout/MainLayout'
 import ProtectedRoute from './ProtectedRoute'
 
 // Provisorio: ocupa las pantallas que todavía no existen. Cada paso (20 a 25) reemplaza la

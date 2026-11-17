@@ -1,4 +1,4 @@
-import { api } from '../../../shared/api/axiosInstance'
+import { api } from '@/shared/api/axiosInstance'
 import type { RegistroData, Usuario } from '../types/auth'
 
 // Las funciones solo hacen el pedido: si falla, el error sigue hasta la pantalla, que arma
