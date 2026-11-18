@@ -74,10 +74,11 @@ function MisPedidosPage() {
     }
     return (
       <>
-        {/* Mientras llega otra página, la actual queda atenuada (isPlaceholderData) */}
+        {/* Mientras se actualiza (otra página, o lo que estaba en caché), la lista queda
+            atenuada y «Cancelar», deshabilitado: puede estar viejo (H106) */}
         <ul
-          aria-busy={pedidos.isPlaceholderData || undefined}
-          className={`space-y-3 transition-opacity ${pedidos.isPlaceholderData ? 'opacity-60' : ''}`}
+          aria-busy={pedidos.isFetching || undefined}
+          className={`space-y-3 transition-opacity ${pedidos.isFetching ? 'opacity-60' : ''}`}
         >
           {items.map((pedido) => {
             const estaAbierto = abierto === pedido.id
@@ -110,6 +111,7 @@ function MisPedidosPage() {
                       <Button
                         variante="peligro"
                         aria-label={`Cancelar el pedido ${pedido.id}`}
+                        disabled={pedidos.isFetching}
                         onClick={() => setACancelar(pedido)}
                       >
                         Cancelar
