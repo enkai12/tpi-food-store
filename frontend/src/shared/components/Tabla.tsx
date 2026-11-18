@@ -13,8 +13,10 @@ function Tabla<T>({ tabla, titulo }: TablaProps<T>) {
   const { pageIndex } = tabla.getState().pagination
   return (
     <>
-      {/* overflow-x-auto: en el celular la tabla se desliza sin romper la página */}
-      <div className="overflow-x-auto rounded-lg border border-stone-200 bg-white">
+      {/* overflow-x-auto: en el celular la tabla se desliza sin romper la página. relative: el
+          texto oculto (sr-only) es absolute y, sin un ancestro posicionado, se escapaba de la
+          caja y estiraba la página (H105) */}
+      <div className="relative overflow-x-auto rounded-lg border border-stone-200 bg-white">
         <table className="w-full text-left text-sm">
           <caption className="sr-only">{titulo}</caption>
           <thead className="bg-stone-50 text-xs text-stone-600">
