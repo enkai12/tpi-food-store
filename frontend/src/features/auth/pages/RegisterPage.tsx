@@ -7,6 +7,7 @@ import Button from '@/shared/ui/Button'
 import Card from '@/shared/ui/Card'
 import Input from '@/shared/ui/Input'
 import { errorDeCampo } from '@/shared/utils/errorDeCampo'
+import { largo } from '@/shared/utils/texto'
 import { useAuthStore } from '@/store/authStore'
 import { registrar } from '../api/auth'
 import type { RegistroData } from '../types/auth'
@@ -21,11 +22,11 @@ function validar(campo: keyof RegistroData, valor: string): string | undefined {
   switch (campo) {
     case 'username':
       if (!texto) return 'Ingresá un nombre de usuario'
-      if (texto.length > 50) return 'Máximo 50 caracteres'
+      if (largo(texto) > 50) return 'Máximo 50 caracteres'
       return undefined
     case 'full_name':
       if (!texto) return 'Ingresá tu nombre'
-      if (texto.length > 100) return 'Máximo 100 caracteres'
+      if (largo(texto) > 100) return 'Máximo 100 caracteres'
       return undefined
     case 'email':
       if (!texto) return 'Ingresá tu email'
@@ -33,7 +34,8 @@ function validar(campo: keyof RegistroData, valor: string): string | undefined {
       return undefined
     case 'password':
       // La contraseña no se recorta: un espacio también cuenta
-      if (valor.length < 8) return 'Mínimo 8 caracteres'
+      // En caracteres, como Python: con .length, «abc😀😀😀» mide 9 y el backend lo rechaza (H92)
+      if (largo(valor) < 8) return 'Mínimo 8 caracteres'
       // bcrypt usa solo los primeros 72 bytes: una «ñ» ocupa 2 (H18)
       if (bytes(valor) > 72) return 'La contraseña es demasiado larga'
       return undefined
