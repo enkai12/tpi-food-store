@@ -3,6 +3,7 @@
 // authApi va primero: el store la importa desde acá, y así se carga antes que las páginas,
 // que a su vez importan el store
 export * as authApi from './api/auth'
+export { NOMBRE_ROL } from './types/auth'
 export type { Rol, Usuario, UsuarioSesion } from './types/auth'
 export { default as LoginPage } from './pages/LoginPage'
 export { default as RegisterPage } from './pages/RegisterPage'

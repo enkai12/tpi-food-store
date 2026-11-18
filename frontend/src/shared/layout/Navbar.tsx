@@ -1,9 +1,7 @@
 import { Link, NavLink, useNavigate } from 'react-router-dom'
-import type { Rol } from '@/features/auth'
+import { NOMBRE_ROL } from '@/features/auth'
 import { useAuthStore } from '@/store/authStore'
 import { useCartStore } from '@/store/cartStore'
-
-const NOMBRE_ROL: Record<Rol, string> = { admin: 'Administrador', user: 'Cliente' }
 
 // NavLink marca el enlace de la página actual (y le pone aria-current="page")
 const claseEnlace = ({ isActive }: { isActive: boolean }) =>

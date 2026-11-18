@@ -1,6 +1,9 @@
 // Los roles que maneja el backend
 export type Rol = 'user' | 'admin'
 
+// Cómo se muestra cada rol: en la Navbar y en la tabla de usuarios del panel
+export const NOMBRE_ROL: Record<Rol, string> = { admin: 'Administrador', user: 'Cliente' }
+
 // Lo que devuelve el backend (UserPublic)
 export interface Usuario {
   id: number
