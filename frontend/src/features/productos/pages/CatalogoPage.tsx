@@ -10,16 +10,11 @@ import { useDebounce } from '@/shared/hooks/useDebounce'
 import Button from '@/shared/ui/Button'
 import Input from '@/shared/ui/Input'
 import Select from '@/shared/ui/Select'
+import { leerEntero } from '@/shared/utils/url'
 import ProductoCard from '../components/ProductoCard'
 import { useProductos } from '../hooks/useProductos'
 
 const POR_PAGINA = 12
-
-// Un entero positivo de la URL, o undefined si falta o no es válido (?pagina=abc)
-function leerEntero(valor: string | null): number | undefined {
-  const n = Number(valor)
-  return valor && Number.isInteger(n) && n > 0 ? n : undefined
-}
 
 function CatalogoPage() {
   // Los filtros viven en la URL (?pagina=2&q=empanada&categoria=2): una recarga, «Atrás» o
