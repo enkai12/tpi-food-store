@@ -55,3 +55,14 @@ export interface FiltrosPedidos {
   estado?: EstadoPedido
   propios?: boolean
 }
+
+// Los indicadores del panel (ResumenPedidos): los conteos por estado, los pedidos de hoy y la
+// suma de los totales de los pedidos ENTREGADO
+export interface ResumenPedidos {
+  pendientes: number
+  en_preparacion: number
+  entregados: number
+  cancelados: number
+  pedidos_hoy: number
+  ingresos_entregados: number
+}

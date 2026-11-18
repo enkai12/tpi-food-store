@@ -1,7 +1,8 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { LoginPage, RegisterPage, UnauthorizedPage } from '@/features/auth'
-import { CarritoPage, CheckoutPage, MisPedidosPage } from '@/features/pedidos'
+import { AdminResumenPage, CarritoPage, CheckoutPage, MisPedidosPage } from '@/features/pedidos'
 import { CatalogoPage } from '@/features/productos'
+import AdminLayout from '@/shared/layout/AdminLayout'
 import MainLayout from '@/shared/layout/MainLayout'
 import ProtectedRoute from './ProtectedRoute'
 
@@ -30,14 +31,16 @@ function AppRouter() {
             <Route path="/mis-pedidos" element={<MisPedidosPage />} />
           </Route>
 
-          {/* Solo admin */}
+          {/* Solo admin, con las secciones del panel arriba (AdminLayout) */}
           <Route element={<ProtectedRoute roles={['admin']} />}>
             <Route path="/admin" element={<Navigate to="/admin/resumen" replace />} />
-            <Route path="/admin/resumen" element={<EnConstruccion titulo="Resumen" />} />
-            <Route path="/admin/categorias" element={<EnConstruccion titulo="Categorías" />} />
-            <Route path="/admin/productos" element={<EnConstruccion titulo="Productos" />} />
-            <Route path="/admin/pedidos" element={<EnConstruccion titulo="Pedidos" />} />
-            <Route path="/admin/usuarios" element={<EnConstruccion titulo="Usuarios" />} />
+            <Route element={<AdminLayout />}>
+              <Route path="/admin/resumen" element={<AdminResumenPage />} />
+              <Route path="/admin/categorias" element={<EnConstruccion titulo="Categorías" />} />
+              <Route path="/admin/productos" element={<EnConstruccion titulo="Productos" />} />
+              <Route path="/admin/pedidos" element={<EnConstruccion titulo="Pedidos" />} />
+              <Route path="/admin/usuarios" element={<EnConstruccion titulo="Usuarios" />} />
+            </Route>
           </Route>
 
           {/* Una dirección que no existe vuelve al catálogo */}
