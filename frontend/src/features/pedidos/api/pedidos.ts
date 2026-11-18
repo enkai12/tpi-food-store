@@ -1,5 +1,6 @@
 import { api } from '@/shared/api/axiosInstance'
 import type {
+  EstadoPedido,
   FiltrosPedidos,
   Pedido,
   PedidoCreate,
@@ -22,6 +23,13 @@ export async function listarPedidos(filtros: FiltrosPedidos): Promise<PedidosPag
 // RN-03 y RN-04: solo el dueño y solo en PENDIENTE; el backend restituye el stock
 export async function cancelarPedido(id: number): Promise<Pedido> {
   const { data } = await api.patch<Pedido>(`/pedidos/${id}/cancelar`)
+  return data
+}
+
+// Solo admin: avanza o cancela según la máquina de estados (RN-02). 400 si la transición no
+// vale (por ejemplo, otro admin ya lo entregó); al cancelar, el backend restituye el stock
+export async function cambiarEstadoPedido(id: number, estado: EstadoPedido): Promise<Pedido> {
+  const { data } = await api.patch<Pedido>(`/pedidos/${id}/estado`, { estado })
   return data
 }
 

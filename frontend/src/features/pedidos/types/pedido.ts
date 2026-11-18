@@ -1,6 +1,24 @@
 // Los estados del pedido, iguales a los del backend (EstadoPedido en pedidos/schemas.py)
 export type EstadoPedido = 'PENDIENTE' | 'EN_PREPARACION' | 'ENTREGADO' | 'CANCELADO'
 
+// La máquina de estados (RN-02), igual a TRANSICIONES en pedidos/service.py: a qué estados se
+// puede pasar desde cada uno. Los botones del panel salen de acá, así nunca ofrecen un cambio
+// que el backend rechazaría. Record obliga a cubrir los cuatro estados
+export const TRANSICIONES: Record<EstadoPedido, EstadoPedido[]> = {
+  PENDIENTE: ['EN_PREPARACION', 'CANCELADO'],
+  EN_PREPARACION: ['ENTREGADO', 'CANCELADO'],
+  ENTREGADO: [],
+  CANCELADO: [],
+}
+
+// El texto del botón que lleva a cada estado
+export const ACCION_HACIA: Record<EstadoPedido, string> = {
+  PENDIENTE: 'Volver a pendiente', // no hay transición hacia PENDIENTE: nunca se muestra
+  EN_PREPARACION: 'Pasar a preparación',
+  ENTREGADO: 'Marcar entregado',
+  CANCELADO: 'Cancelar',
+}
+
 // RN-06: las dos formas de pago que acepta el backend
 export type FormaPago = 'EFECTIVO' | 'TRANSFERENCIA'
 

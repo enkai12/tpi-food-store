@@ -1,4 +1,5 @@
-// La API pública de la feature pedidos. El paso 25 suma la de pedidos del admin
+// La API pública de la feature pedidos: las pantallas del cliente y las del panel
+export { default as AdminPedidosPage } from './pages/AdminPedidosPage'
 export { default as AdminResumenPage } from './pages/AdminResumenPage'
 export { default as CarritoPage } from './pages/CarritoPage'
 export { default as CheckoutPage } from './pages/CheckoutPage'
