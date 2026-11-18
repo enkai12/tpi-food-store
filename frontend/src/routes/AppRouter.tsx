@@ -1,18 +1,21 @@
+import { lazy } from 'react'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { LoginPage, RegisterPage, UnauthorizedPage } from '@/features/auth'
-import { AdminCategoriasPage } from '@/features/categorias'
-import {
-  AdminPedidosPage,
-  AdminResumenPage,
-  CarritoPage,
-  CheckoutPage,
-  MisPedidosPage,
-} from '@/features/pedidos'
-import { AdminProductosPage, CatalogoPage } from '@/features/productos'
-import { AdminUsuariosPage } from '@/features/usuarios'
+import { CarritoPage, CheckoutPage, MisPedidosPage } from '@/features/pedidos'
+import { CatalogoPage } from '@/features/productos'
 import AdminLayout from '@/shared/layout/AdminLayout'
 import MainLayout from '@/shared/layout/MainLayout'
 import ProtectedRoute from './ProtectedRoute'
+
+// El panel se descarga recién cuando el admin entra: un cliente no baja ese código, ni
+// TanStack Table (H100). Cada import() es un archivo aparte que Vite separa del principal.
+// Van directo al archivo de la página y no por el barrel (excepción a H76): si el barrel las
+// exportara, como el resto de la app lo importa al inicio, el panel volvería al principal
+const AdminResumenPage = lazy(() => import('@/features/pedidos/pages/AdminResumenPage'))
+const AdminCategoriasPage = lazy(() => import('@/features/categorias/pages/AdminCategoriasPage'))
+const AdminProductosPage = lazy(() => import('@/features/productos/pages/AdminProductosPage'))
+const AdminPedidosPage = lazy(() => import('@/features/pedidos/pages/AdminPedidosPage'))
+const AdminUsuariosPage = lazy(() => import('@/features/usuarios/pages/AdminUsuariosPage'))
 
 function AppRouter() {
   return (

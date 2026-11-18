@@ -1,6 +1,5 @@
-// La API pública de la feature pedidos: las pantallas del cliente y las del panel
-export { default as AdminPedidosPage } from './pages/AdminPedidosPage'
-export { default as AdminResumenPage } from './pages/AdminResumenPage'
+// La API pública de la feature pedidos: las pantallas del cliente. Las del panel no van acá:
+// el router las carga aparte (lazy, H112)
 export { default as CarritoPage } from './pages/CarritoPage'
 export { default as CheckoutPage } from './pages/CheckoutPage'
 export { default as MisPedidosPage } from './pages/MisPedidosPage'

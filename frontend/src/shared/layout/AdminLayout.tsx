@@ -1,4 +1,6 @@
+import { Suspense } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
+import Skeleton from '@/shared/components/Skeleton'
 
 const SECCIONES = [
   { ruta: '/admin/resumen', texto: 'Resumen' },
@@ -34,7 +36,11 @@ function AdminLayout() {
           ))}
         </ul>
       </nav>
-      <Outlet />
+      {/* Las pantallas del panel se cargan aparte (lazy en AppRouter). Mientras llega la primera
+          vez, las secciones quedan arriba y abajo se ve un skeleton */}
+      <Suspense fallback={<Skeleton cantidad={4} alto="h-12" />}>
+        <Outlet />
+      </Suspense>
     </div>
   )
 }
