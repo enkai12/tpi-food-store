@@ -70,11 +70,14 @@ class PedidoService:
         skip: int,
         limit: int,
         estado: str | None = None,
+        propios: bool = False,
     ) -> PedidosPaginados:
-        # RN-04: el admin ve todos; un cliente, solo los suyos
+        # RN-04: el admin ve todos; un cliente, solo los suyos. Con propios, el admin también
+        # ve solo los suyos (su pantalla «Mis pedidos», H89)
+        todos = es_admin and not propios
         with self.uow as uow:
             total, pedidos = uow.pedidos.list_by_usuario(
-                None if es_admin else usuario_id, skip, limit, estado
+                None if todos else usuario_id, skip, limit, estado
             )
             items = [PedidoRead.model_validate(p) for p in pedidos]
             return PedidosPaginados(total=total, items=items)

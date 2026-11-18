@@ -58,8 +58,10 @@ def listar_pedidos(
     skip: Annotated[int, Query(ge=0, le=ENTERO_MAX)] = 0,
     limit: Annotated[int, Query(ge=1, le=100)] = 20,
     estado: EstadoPedido | None = None,
+    # Con true, solo los del que pregunta, aunque sea admin (la pantalla «Mis pedidos», H89)
+    propios: bool = False,
 ):
-    return service.listar(usuario.id, usuario.role == "admin", skip, limit, estado)
+    return service.listar(usuario.id, usuario.role == "admin", skip, limit, estado, propios)
 
 
 # Los indicadores del panel del admin. Tiene que estar antes de GET /{id}: FastAPI prueba
