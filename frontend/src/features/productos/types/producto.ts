@@ -28,3 +28,23 @@ export interface FiltrosProductos {
   categoria_id?: number
   disponible?: boolean
 }
+
+// Lo que manda el panel al crear (ProductoCreate). Al editar van los mismos campos menos
+// stock y disponible, que se cambian aparte con PATCH /stock (H103)
+export interface ProductoDatos {
+  nombre: string
+  descripcion: string | null
+  precio_base: number
+  imagen_url: string | null
+  stock: number
+  disponible: boolean
+  categoria_id: number
+}
+
+export type ProductoEdicion = Omit<ProductoDatos, 'stock' | 'disponible'>
+
+// El cuerpo de PATCH /productos/{id}/stock (ProductoStockUpdate): los dos son obligatorios
+export interface StockDatos {
+  stock: number
+  disponible: boolean
+}
