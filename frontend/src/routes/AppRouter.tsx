@@ -1,11 +1,11 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { LoginPage, RegisterPage, UnauthorizedPage } from '@/features/auth'
-import { CarritoPage } from '@/features/pedidos'
+import { CarritoPage, CheckoutPage, MisPedidosPage } from '@/features/pedidos'
 import { CatalogoPage } from '@/features/productos'
 import MainLayout from '@/shared/layout/MainLayout'
 import ProtectedRoute from './ProtectedRoute'
 
-// Provisorio: ocupa las pantallas que todavía no existen. Cada paso (22 a 25) reemplaza la
+// Provisorio: ocupa las pantallas que todavía no existen. Cada paso (23 a 25) reemplaza la
 // suya, así la tabla de rutas y su protección quedan completas desde ahora
 function EnConstruccion({ titulo }: { titulo: string }) {
   return <h1 className="text-2xl font-bold text-stone-900">{titulo}</h1>
@@ -26,8 +26,8 @@ function AppRouter() {
 
           {/* Con sesión, cualquier rol */}
           <Route element={<ProtectedRoute />}>
-            <Route path="/checkout" element={<EnConstruccion titulo="Confirmar pedido" />} />
-            <Route path="/mis-pedidos" element={<EnConstruccion titulo="Mis pedidos" />} />
+            <Route path="/checkout" element={<CheckoutPage />} />
+            <Route path="/mis-pedidos" element={<MisPedidosPage />} />
           </Route>
 
           {/* Solo admin */}

@@ -19,7 +19,7 @@ export const queryClient = new QueryClient({
       retry: convieneReintentar,
       // Durante 30 s los datos se consideran frescos: montar otra pantalla con la misma
       // queryKey no repite el pedido. Lo que cambia por una acción del usuario se refresca
-      // igual con invalidateQueries en el onSuccess de cada mutación
+      // igual con invalidateQueries cuando termina cada mutación
       staleTime: 30_000,
     },
     // Las mutaciones quedan sin reintentos (el valor por defecto): repetir un POST podría,
